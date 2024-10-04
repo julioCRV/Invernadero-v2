@@ -1,0 +1,19 @@
+https://gmb-tci.onrender.com/user/test
+
+para obtener credencial del primer usuario
+
+https://gmb-tci.onrender.com/user/login
+
+para iniciar sesion retorna el id del usuario cuando se accede correctamente
+
+https://gmb-tci.onrender.com/controller/get_drivers
+
+para obtener todos los controladores que corresponden a un solo usuario te retorna el cod de controlador como titulo y el codigo de cultivo para mostrar una imagen
+
+https://gmb-tci.onrender.com/controller/get_controller_information
+
+para obtener la informacion en tiempo real del controlador retorna varios datos
+
+https://gmb-tci.onrender.com/controller/get_controller_detail
+
+obtienes los detalles de un controlador seleccionado requiere el codigo obtenido de la lista de controladores
