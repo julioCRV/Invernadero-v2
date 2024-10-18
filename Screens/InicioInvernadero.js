@@ -1,4 +1,4 @@
-import { Dimensions, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
+import { Dimensions, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -12,7 +12,7 @@ const data = [
     {
         id: '1',
         cod_controlador: "9173690",
-        image: require('../assets/zanahoria.png'), 
+        image: require('../assets/zanahoria.png'),
         tipe: 'Cultivo de Zanahorias',
         description: 'Este invernadero está especialmente diseñado para el cultivo de zanahorias, proporcionando un suelo suelto y bien drenado. Las condiciones controladas permiten un crecimiento uniforme y saludable durante todo el año.',
         feature: ['Control de Humedad', 'Riego por Goteo'],
@@ -20,11 +20,11 @@ const data = [
     {
         id: '1',
         cod_controlador: "249978",
-        image: require('../assets/zanahoria.png'), 
+        image: require('../assets/zanahoria.png'),
         tipe: 'Invernadero de Zanahorias Orgánicas',
         description: 'Este invernadero está optimizado para el cultivo de zanahorias orgánicas. Utiliza un sistema de control automático de riego y monitoreo de nutrientes para asegurar el crecimiento saludable de zanahorias sin el uso de pesticidas. Ideal para la producción de alimentos ecológicos de alta calidad.',
         feature: ['Riego por Goteo Automatizado', 'Control de temperatura', 'Producción Ecológica'],
-    
+
     },
     // {
     //     id: '3',
@@ -45,14 +45,23 @@ const data = [
 
 const BoxItem = ({ item, }) => {
     const navigation = useNavigation();
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedData, setEditedData] = useState({
+        tipe: item.tipe,
+        description: item.description,
+        feature: item.feature,
+    });
+
     const goDetalles = () => {
         //Click en Detalles
-        setModalVisible(true)
+        setModalVisible(true);
+        setIsEditing(false);
     }
     const goMonitorear = () => {
         //Click en Monitorear
         // navigation.navigate('VerConfig', { name, imageUrl });
-        navigation.navigate('Monitorear', {item});
+        navigation.navigate('Monitorear', { item });
     }
     const goDashboard = () => {
         //Click en Dashboard
@@ -60,9 +69,23 @@ const BoxItem = ({ item, }) => {
     }
     const goEditar = () => {
         //Click en Editar
+        setModalVisible(true);
+        setIsEditing(true);
     }
 
-    const [modalVisible, setModalVisible] = useState(false);
+    const handleSave = () => {
+        item.tipe = editedData.tipe;
+        item.description = editedData.description;
+        item.feature = editedData.feature;
+        setModalVisible(false);
+    };
+
+    const handleInputChange = (name, value) => {
+        setEditedData({
+            ...editedData,
+            [name]: value,
+        });
+    };
 
     return (
         <View style={style.box}>
@@ -74,20 +97,59 @@ const BoxItem = ({ item, }) => {
             >
                 <View style={style.modalBackground}>
                     <View style={style.modalContainer}>
-                        <Pressable onPress={() => setModalVisible(false)} style={{ position: 'absolute', right: 10, top: 5, borderRadius: 100, borderColor: 'black', borderWidth: 1, width: 25, height: 25, }}>
+                        {/* Botón de cerrar */}
+                        <Pressable
+                            onPress={() => setModalVisible(false)}
+                            style={{ position: 'absolute', right: 10, top: 5, borderRadius: 100, borderColor: 'black', borderWidth: 1, width: 25, height: 25 }}
+                        >
                             <Text style={{ textAlign: 'center' }}>x</Text>
                         </Pressable>
-                        <Text style={style.modalText} numberOfLines={2} > {item.tipe}</Text>
-                        <View style={{ height: 15 }} />
-                        <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
-                        <Text>{item.description}</Text>
-                        <View style={{ height: 15 }} />
-                        <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
-                        <View >
-                            {item.feature.map((item, index) => (
-                                <Text>*{item}</Text>
-                            ))}
-                        </View>
+
+                        {/* Modo de Edición o Vista */}
+                        {isEditing ? (
+                            <>
+                                <TextInput
+                                    style={style.modalText}
+                                    value={editedData.tipe}
+                                    onChangeText={(value) => handleInputChange('tipe', value)}
+                                />
+                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
+                                <TextInput
+                                    value={editedData.description}
+                                    onChangeText={(value) => handleInputChange('description', value)}
+                                    multiline={true} // Permite múltiples líneas
+                                    numberOfLines={4} // Número de líneas visibles por defecto
+                                />
+                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
+                                {editedData.feature.map((item, index) => (
+                                    <TextInput
+                                        key={index}
+                                        value={item}
+                                        onChangeText={(value) => {
+                                            const newFeatures = [...editedData.feature];
+                                            newFeatures[index] = value;
+                                            setEditedData({ ...editedData, feature: newFeatures });
+                                        }}
+                                        multiline={true} // Permite múltiples líneas
+                                        numberOfLines={1} // Número de líneas visibles por defecto
+                                    />
+                                ))}
+                                <Pressable style={style.button} onPress={handleSave}>
+                                    <Text>Guardar</Text>
+                                </Pressable>
+                            </>
+                        ) : (
+                            <>
+                                <Text style={style.modalText} numberOfLines={2}>{item.tipe}</Text>
+                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
+                                <Text>{item.description}</Text>
+                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
+                                {item.feature.map((item, index) => (
+                                    <Text key={index}>*{item}</Text>
+                                ))}
+                            </>
+                        )}
+
                         <Pressable title="Close" onPress={() => setModalVisible(false)} />
                     </View>
                 </View>
@@ -112,8 +174,8 @@ const BoxItem = ({ item, }) => {
                     <Octicons name="graph" size={24} color="black" />
                     <Text style={{ fontSize: 10 }}>Dashboard</Text>
                 </Pressable>
-                <Pressable style={{ alignItems: 'center', marginRight: 5 }}>
-                    <Foundation name="page-edit" size={24} color="black" onPress={() => goEditar()} />
+                <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goEditar()} >
+                    <Foundation name="page-edit" size={24} color="black" />
                     <Text style={{ fontSize: 10 }}>Editar</Text>
                 </Pressable>
             </View>
@@ -235,6 +297,15 @@ const style = StyleSheet.create({
         marginBottom: 20,
         fontSize: 15,
 
+    },
+    button: {
+        borderWidth: 1,
+        width: '70%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingVertical: 2,
+        shadowColor: 'black',
+        elevation: 1,
     },
 })
 

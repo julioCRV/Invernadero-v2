@@ -1,15 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ImageBackground } from 'react-native';
+
+import { StyleSheet, ImageBackground } from 'react-native';
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
-import ListaInvernaderos from './Screens/ListaInvernaderos';
+import InicioInvernadero from './Screens/InicioInvernadero';
 import IniciarSesion from './Screens/IniciarSesion';
-import MonitorearInvernadero from './Screens/MonitorearInvernadero';
+import MonitorearControladores from './Screens/MonitorearControladores';
 import Dashboard from './Screens/Dashboard'
 import { Ionicons } from '@expo/vector-icons';
-const Stack = createStackNavigator();
 
 const VistaInicio = ({ navigation }) => {
 
@@ -23,7 +22,7 @@ const VistaInicio = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('./assets/fondon.png')}
+      source={require('./assets/fondoInicial.png')}
       style={styles.container}
       resizeMode="cover"
     >
@@ -33,7 +32,7 @@ const VistaInicio = ({ navigation }) => {
 
 const HomeScreen = ({ navigation }) => {
   return (
-    <ListaInvernaderos navigation={navigation} />
+    <InicioInvernadero navigation={navigation} />
   );
 };
 
@@ -71,7 +70,7 @@ export default function App() {
             ),
             headerLeft: () => null,
           })} />
-        <Stack.Screen name="Monitorear" component={MonitorearInvernadero}
+        <Stack.Screen name="Monitorear" component={MonitorearControladores}
           options={({ navigation }) => ({
             title: "Nombre del invernadero",
             headerTintColor: "white",
