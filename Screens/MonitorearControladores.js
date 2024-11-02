@@ -9,7 +9,7 @@ import {
 const MonitorearControladores = () => {
     const route = useRoute();
     const { item } = route.params;
-    console.log(item.cod_controlador);
+    // console.log("acccccccccccccccccccccc", item);
 
     const [data, setData] = useState(null);
 
@@ -37,7 +37,7 @@ const MonitorearControladores = () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    setData(data[0]); console.log(data[0]);// Guarda la información recibida en el estado
+                    setData(data[0]); // console.log(data[0]);Guarda la información recibida en el estado
                 } else {
                     console.error('Error en la respuesta:', data.message);
                 }
@@ -80,7 +80,7 @@ const MonitorearControladores = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/fondo.png')}
+            source={require('../assets/fondo1.png')}
             style={styles.container}
             resizeMode="cover"
         >
@@ -88,22 +88,22 @@ const MonitorearControladores = () => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}>
 
-                {/* <Text style={styles.title}>{name}</Text> */}
+                <Text style={styles.title}>{item.tipe}</Text>
 
-                <Text style={styles.sectionTitle}>Sensores:</Text>
+                <Text style={styles.sectionTitle}>SENSORES:</Text>
                 <View style={styles.cardsContainer}>
                     {data &&
                         Object.entries(data)
                             .filter(([, value]) => typeof value !== 'boolean')
                             .map(([key, value]) => (
                                 <View key={key} style={styles.card}>
-                                    <Text style={styles.label}>{key.replace(/_/g, ' ')}</Text>
+                                    <Text style={styles.label}>{key.replace(/_/g, ' ')} </Text>
                                     <Text style={styles.num}>{value}</Text>
                                 </View>
                             ))}
                 </View>
 
-                <Text style={styles.sectionTitle}>Estados:</Text>
+                <Text style={styles.sectionTitle}>ESTADOS:</Text>
                 <View style={styles.cardsContainer}>
                     {data &&
                         Object.entries(data)
@@ -111,16 +111,57 @@ const MonitorearControladores = () => {
                             .map(([key, value]) => (
                                 <TouchableOpacity
                                     key={key}
-                                    style={styles.card}
+                                    style={[
+                                        styles.card,
+                                        { backgroundColor: value ? '#FCA61D' : 'white' }, // Cambia el color de fondo según el valor de `value`
+                                    ]}
+                                    onPress={() => handleChangeState(key, !value)}
+                                >
+                                    <Text style={styles.labelEstados}>{key.replace(/_/g, ' ')}</Text>
+                                    <View style={styles.columnContainer}>
+                                        <View style={styles.imageContainerEstados}>
+                                            <Image
+                                                source={getImageSource(key.replace(/_/g, ' '), value)}
+                                                style={styles.statusImage}
+                                            />
+                                        </View>
+                                        <View style={styles.switchContainer}>
+                                            <Switch
+                                                value={value}
+                                                onValueChange={() => handleChangeState(key, !value)}
+                                                thumbColor="white"
+                                                trackColor={{ false: '#ccc', true: '#FFFF85' }} // Cambia el color del Switch cuando está activo
+                                            />
+                                        </View>
+                                    </View>
+                                    {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
+                                </TouchableOpacity>
+                            ))}
+                </View>
+
+                <Text style={styles.sectionTitle}>CONTROL MANUAL:</Text>
+                <View style={styles.cardsContainer}>
+                    {data &&
+                        Object.entries(data)
+                            .filter(([, value]) => typeof value === 'boolean')
+                            .map(([key, value]) => (
+                                <TouchableOpacity
+                                    key={key}
+                                    style={[
+                                        styles.cardControl,
+                                        { backgroundColor: value ? '#58C45E' : 'white' }, // Cambia el color de fondo según el valor de `value`
+                                    ]}
                                     onPress={() => handleChangeState(key, !value)}
                                 >
                                     <Text style={styles.label}>{key.replace(/_/g, ' ')}</Text>
                                     <View style={styles.imageContainer}>
-                                        <Image
-                                            source={getImageSource(key.replace(/_/g, ' '), value)}
-                                            style={styles.statusImage}
+                                        <Switch
+                                            value={value}
+                                            onValueChange={() => handleChangeState(key, !value)}
+                                            thumbColor="white"
+                                            trackColor={{ false: '#ccc', true: '#FFFF85' }} // Cambia el color del Switch cuando está activo
                                         />
-                                        <Text>{value ? 'Encendido' : 'Apagado'}</Text>
+                                        {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
                                     </View>
                                 </TouchableOpacity>
                             ))}
@@ -134,32 +175,40 @@ const MonitorearControladores = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 15,
+        padding: 18,
+        paddingTop: '18%',
+        height: '120%'
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#8dfdc0',
+        // color: '#8dfdc0',
         textAlign: 'center',
-
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginTop: 15,
         marginBottom: 10,
-        color: '#8dfdc0',
-
+        color: '#000',
     },
     cardsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+
     },
     card: {
         width: '48%',
         backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 15,
+    },
+    cardControl: {
+        width: '48%',
+        backgroundColor: '#58C45E',
         borderRadius: 10,
         padding: 10,
         marginBottom: 15,
@@ -192,6 +241,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
     },
+    labelEstados: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center'
+    },
     label: {
         fontSize: 16,
         fontWeight: 'bold',
@@ -201,16 +256,34 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignItems: 'center',
     },
+    columnContainer: {
+        flexDirection: 'row', // Establece la dirección en fila
+        alignItems: 'center', // Centra verticalmente los elementos en la fila
+        justifyContent: 'center', // Opcional: centra horizontalmente la fila
+    },
+    imageContainerEstados: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#EAE9E5',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        marginRight: 10, // Espacio entre el círculo y el switch
+    },
+    switchContainer: {
+        alignItems: 'center', // Centra el switch verticalmente dentro de su contenedor
+    },
     statusImage: {
-        width: 30,
-        height: 30,
-        marginRight: 10,
+        width: 40,
+        height: 40,
+        // marginRight: 10,
     },
     num: {
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center',
         color: '#fa6900',
+
     },
 });
 

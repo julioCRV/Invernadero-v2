@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, FlatList, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, FlatList, ScrollView, ImageBackground } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 const Dashboard = () => {
@@ -17,88 +17,93 @@ const Dashboard = () => {
     { id: '4', date: '2024-10-17', time: '15:00', device: 'Humidificación', status: 'Apagado' },
     { id: '5', date: '2024-10-17', time: '17:45', device: 'Ventilación', status: 'Encendido' },
   ]);
-  
+
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}>
-      <View style={styles.container}>
-        {/* Título */}
-        <Text style={styles.title}>Dashboard</Text>
+    <ImageBackground
+      source={require('../assets/fondo1.png')}
+      style={styles.container}
+      resizeMode="cover">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}>
+        <View>
+          {/* Título */}
+          <Text style={styles.title}>Dashboard</Text>
 
-        {/* Gráfico de Línea para Temperatura */}
-        <Text style={styles.subtitle}>Temperatura (°C)</Text>
-        <LineChart
-          data={{
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [{ data: data.temperature, color: () => '#ff6347', strokeWidth: 2 }],
-          }}
-          width={Dimensions.get('window').width - 40} // Ancho del gráfico
-          height={220} // Alto del gráfico
-          yAxisSuffix="°C"
-          chartConfig={{
-            backgroundColor: '#FFF',
-            backgroundGradientFrom: '#f5f5f5',
-            backgroundGradientTo: '#f5f5f5',
-            decimalPlaces: 1, // Mostramos 1 decimal
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: { borderRadius: 16 },
-            propsForDots: { r: '4', strokeWidth: '2', stroke: '#ffa726' },
-          }}
-          bezier // Suavizamos las líneas
-          style={{ marginVertical: 20, borderRadius: 16 }}
-        />
+          {/* Gráfico de Línea para Temperatura */}
+          <Text style={styles.subtitle}>TEMPERATURA</Text>
+          <LineChart
+            data={{
+              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+              datasets: [{ data: data.temperature, color: () => '#ff6347', strokeWidth: 2 }],
+            }}
+            width={Dimensions.get('window').width - 40} // Ancho del gráfico
+            height={220} // Alto del gráfico
+            yAxisSuffix="°C"
+            chartConfig={{
+              backgroundColor: '#FFF',
+              backgroundGradientFrom: '#f5f5f5',
+              backgroundGradientTo: '#f5f5f5',
+              decimalPlaces: 1, // Mostramos 1 decimal
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              style: { borderRadius: 16 },
+              propsForDots: { r: '4', strokeWidth: '2', stroke: '#ffa726' },
+            }}
+            bezier // Suavizamos las líneas
+            style={{ marginVertical: 20, borderRadius: 16 }}
+          />
 
-        {/* Gráfico de Línea para Humedad */}
-        <Text style={styles.subtitle}>Humedad (%)</Text>
-        <LineChart
-          data={{
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [{ data: data.humidity, color: () => '#1e90ff', strokeWidth: 2 }],
-          }}
-          width={Dimensions.get('window').width - 40} // Ancho del gráfico
-          height={220} // Alto del gráfico
-          yAxisSuffix="%"
-          chartConfig={{
-            backgroundColor: '#FFF',
-            backgroundGradientFrom: '#f5f5f5',
-            backgroundGradientTo: '#f5f5f5',
-            decimalPlaces: 0, // Mostramos sin decimales
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: { borderRadius: 16 },
-            propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
-          }}
-          bezier // Suavizamos las líneas
-          style={{ marginVertical: 20, borderRadius: 16 }}
-        />
+          {/* Gráfico de Línea para Humedad */}
+          <Text style={styles.subtitle}>HUMEDAD</Text>
+          <LineChart
+            data={{
+              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+              datasets: [{ data: data.humidity, color: () => '#1e90ff', strokeWidth: 2 }],
+            }}
+            width={Dimensions.get('window').width - 40} // Ancho del gráfico
+            height={220} // Alto del gráfico
+            yAxisSuffix="%"
+            chartConfig={{
+              backgroundColor: '#FFF',
+              backgroundGradientFrom: '#f5f5f5',
+              backgroundGradientTo: '#f5f5f5',
+              decimalPlaces: 0, // Mostramos sin decimales
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              style: { borderRadius: 16 },
+              propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
+            }}
+            bezier // Suavizamos las líneas
+            style={{ marginVertical: 20, borderRadius: 16 }}
+          />
 
-        {/* Tabla de Registro de Estado de Sensores */}
-        <Text style={styles.subtitle}>Registro de Estado de Sensores</Text>
-        <FlatList
-          data={sensorStatus}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.tableRow}>
-              <Text style={styles.tableCell}>{item.date}</Text>
-              <Text style={styles.tableCell}>{item.time}</Text>
-              <Text style={styles.tableCell}>{item.device}</Text>
-              <Text style={styles.tableCell}>{item.status}</Text>
-            </View>
-          )}
-          ListHeaderComponent={() => (
-            <View style={[styles.tableRow, styles.tableHeader]}>
-              <Text style={styles.tableCell}>Fecha</Text>
-              <Text style={styles.tableCell}>Hora</Text>
-              <Text style={styles.tableCell}>Dispositivo</Text>
-              <Text style={styles.tableCell}>Estado</Text>
-            </View>
-          )}
-        />
-      </View>
-    </ScrollView>
+          {/* Tabla de Registro de Estado de Sensores */}
+          <Text style={styles.subtitleTabla}>REGISTRO DE ESTADOS DE SENSORES</Text>
+          <FlatList
+            data={sensorStatus}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{item.date}</Text>
+                <Text style={styles.tableCell}>{item.time}</Text>
+                <Text style={styles.tableCell}>{item.device}</Text>
+                <Text style={styles.tableCell}>{item.status}</Text>
+              </View>
+            )}
+            ListHeaderComponent={() => (
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <Text style={styles.tableCell}>Fecha</Text>
+                <Text style={styles.tableCell}>Hora</Text>
+                <Text style={styles.tableCell}>Dispositivo</Text>
+                <Text style={styles.tableCell}>Estado</Text>
+              </View>
+            )}
+          />
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
@@ -108,6 +113,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#F5F5F5',
+    paddingTop: '18%',
+    height: '120%'
   },
   title: {
     fontSize: 24,
@@ -117,19 +124,28 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: '#666',
+    fontWeight: 'bold',
+    // color: '#666',
     marginVertical: 10,
     textAlign: 'left',
+  },
+  subtitleTabla: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    // color: '#666',
+    marginVertical: 10,
+    textAlign: 'center',
   },
   tableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomWidth: 2,
+    borderBottomColor: 'black',
+    backgroundColor: '#FFFF85'
   },
   tableHeader: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#FED351',
   },
   tableCell: {
     flex: 1,

@@ -8,7 +8,7 @@ import InicioInvernadero from './Screens/InicioInvernadero';
 import IniciarSesion from './Screens/IniciarSesion';
 import MonitorearControladores from './Screens/MonitorearControladores';
 import Dashboard from './Screens/Dashboard'
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 const VistaInicio = ({ navigation }) => {
 
@@ -48,23 +48,21 @@ export default function App() {
 
         <Stack.Screen name='IniciarSesion' component={IniciarSesion}
           options={{
-            title: "",
-            headerTintColor: "white",
+            title: " ",
+            // headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#FCB03E" },
+            headerTransparent: true,
           }} />
         <Stack.Screen name='Lista' component={HomeScreen}
           options={({ navigation }) => ({
-            title: "Green Manager TC",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
+            title: " ",
             headerStyle: { backgroundColor: "#FCB03E" },
+            headerTransparent: true,
             headerRight: () => (
-              <Ionicons
+              <Feather
                 name="log-out"
-                size={24}
-                color="white"
-                style={{ marginRight: 10 }}
+                size={30}
+                style={{ paddingRight: 5 }}
                 onPress={() => navigation.navigate('IniciarSesion')}
               />
             ),
@@ -72,32 +70,44 @@ export default function App() {
           })} />
         <Stack.Screen name="Monitorear" component={MonitorearControladores}
           options={({ navigation }) => ({
-            title: "Nombre del invernadero",
-            headerTintColor: "white",
+            title: " ",
+            // headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#FCB03E" },
+            headerTransparent: true,
+            headerBackImage: () => (
+              <Ionicons 
+                name="arrow-back-circle-outline" 
+                size={35} 
+                // style={{ paddingLeft: 10}} 
+              />
+            ),
             headerRight: () => (
-              <Ionicons
+              <Feather
                 name="log-out"
-                size={24}
-                color="white"
-                style={{ marginRight: 10 }}
+                size={30}
+                style={{ paddingRight: 5 }}
                 onPress={() => navigation.navigate('IniciarSesion')}
               />
             ),
           })} />
         <Stack.Screen name="Dashboard" component={Dashboard}
           options={({ navigation }) => ({
-            title: "Dashboard",
+            title: " ",
             headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#FCB03E" },
+            headerTransparent: true,
+            headerBackImage: () => (
+              <Ionicons 
+                name="arrow-back-circle-outline" 
+                size={35} 
+                // style={{ paddingLeft: 10}} 
+              />
+            ),
             headerRight: () => (
-              <Ionicons
+              <Feather
                 name="log-out"
-                size={24}
-                color="white"
-                style={{ marginRight: 10 }}
+                size={30}
+                style={{ paddingRight: 5 }}
                 onPress={() => navigation.navigate('IniciarSesion')}
               />
             ),

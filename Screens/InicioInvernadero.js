@@ -1,4 +1,4 @@
-import { Dimensions, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
+import { Dimensions, FlatList, Image, Modal, Pressable, ImageBackground, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -47,6 +47,7 @@ const BoxItem = ({ item, }) => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
     const [editedData, setEditedData] = useState({
         tipe: item.tipe,
         description: item.description,
@@ -57,6 +58,7 @@ const BoxItem = ({ item, }) => {
         //Click en Detalles
         setModalVisible(true);
         setIsEditing(false);
+        setIsVisible(true);
     }
     const goMonitorear = () => {
         //Click en Monitorear
@@ -71,6 +73,7 @@ const BoxItem = ({ item, }) => {
         //Click en Editar
         setModalVisible(true);
         setIsEditing(true);
+        setIsVisible(false);
     }
 
     const handleSave = () => {
@@ -104,10 +107,17 @@ const BoxItem = ({ item, }) => {
                         >
                             <Text style={{ textAlign: 'center' }}>x</Text>
                         </Pressable>
+                        {isVisible && (
+                            <Pressable style={{ alignItems: 'center', marginRight: 230 }} onPress={goEditar}>
+                                <Foundation name="page-edit" size={24} color="black" />
+                                <Text style={{ fontSize: 10 }}>Editar</Text>
+                            </Pressable>
+                        )}
 
                         {/* Modo de Edición o Vista */}
                         {isEditing ? (
                             <>
+                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Titulo:</Text>
                                 <TextInput
                                     style={style.modalText}
                                     value={editedData.tipe}
@@ -119,10 +129,12 @@ const BoxItem = ({ item, }) => {
                                     onChangeText={(value) => handleInputChange('description', value)}
                                     multiline={true} // Permite múltiples líneas
                                     numberOfLines={4} // Número de líneas visibles por defecto
+                                    style={{borderColor: 'black', borderWidth: 1}}
                                 />
                                 <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
                                 {editedData.feature.map((item, index) => (
                                     <TextInput
+                                    style={{borderColor: 'black', borderWidth: 1}}
                                         key={index}
                                         value={item}
                                         onChangeText={(value) => {
@@ -134,13 +146,20 @@ const BoxItem = ({ item, }) => {
                                         numberOfLines={1} // Número de líneas visibles por defecto
                                     />
                                 ))}
-                                <Pressable style={style.button} onPress={handleSave}>
-                                    <Text>Guardar</Text>
-                                </Pressable>
+                                <View style={style.buttonsContainer}>
+                                    <Pressable style={style.button2} onPress={() => setModalVisible(false)} >
+                                        <Text style={style.textButton}>Cancelar</Text>
+                                    </Pressable>
+                                    <Pressable style={style.button} onPress={handleSave}>
+                                        <Text style={style.textButton}>Guardar</Text>
+                                    </Pressable>
+                                </View>
+
+
                             </>
                         ) : (
                             <>
-                                <Text style={style.modalText} numberOfLines={2}>{item.tipe}</Text>
+                                <Text style={style.modalTextVer} numberOfLines={2}>{item.tipe}</Text>
                                 <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
                                 <Text>{item.description}</Text>
                                 <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
@@ -161,7 +180,7 @@ const BoxItem = ({ item, }) => {
                     style={{ width: 100, height: 100 }} // Ajusta el tamaño de la imagen
                 />
             </View>
-            <View style={{ flexDirection: 'row', }}>
+            <View style={{ flexDirection: 'row'}}>
                 <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goDetalles()}>
                     <FontAwesome name="file-text-o" size={24} color="black" />
                     <Text style={{ fontSize: 10 }}>Detalles</Text>
@@ -174,10 +193,7 @@ const BoxItem = ({ item, }) => {
                     <Octicons name="graph" size={24} color="black" />
                     <Text style={{ fontSize: 10 }}>Dashboard</Text>
                 </Pressable>
-                <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goEditar()} >
-                    <Foundation name="page-edit" size={24} color="black" />
-                    <Text style={{ fontSize: 10 }}>Editar</Text>
-                </Pressable>
+
             </View>
         </View>
     )
@@ -192,30 +208,33 @@ export default function GreenManagerTc(props) {
     }
 
     return (
-        <View style={[style.mainContainer, { width: '100%', height: '100%' }]}>
+        <ImageBackground
+            source={require('../assets/fondo1.png')}
+            style={style.container}
+            resizeMode="cover"
+        >
+
             {/**Space */}
-            <View style={{ height: 0 }} />
+
             {/**Caja del titulo */}
 
-            {/* <View style={style.boxTitle}>
+            <View style={style.boxTitle}>
                 <Text style={style.title}>Green Manager TC</Text>
-                <Pressable onPress={() => back()}>
-                    <Entypo name="log-out" size={24} color="black" />
-                </Pressable>
             </View>
-            <View style={{ height: 20 }} /> */}
-
+            <Text style={{ fontSize: 20 }}>Invernaderos</Text>
+            <View style={{ height: 20 }} />
             {/**Lista de GreenHouses */}
 
-            <View style={{ width: '100%', height: FLATLIST_HEIGHT }}>
-                <FlatList
-                    data={data}
-                    renderItem={({ item }) => <BoxItem item={item} />}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={style.container}
-                />
-            </View>
-        </View>
+
+            <FlatList
+                data={data}
+                renderItem={({ item }) => <BoxItem item={item} />}
+                keyExtractor={item => item.id}
+            // contentContainerStyle={style.container}
+            />
+
+
+        </ImageBackground>
     )
 }
 
@@ -225,8 +244,15 @@ const { height } = Dimensions.get('window')
 const TITLE_HEIGHT = 70;
 const FLATLIST_HEIGHT = height - 50 - TITLE_HEIGHT;
 
-const BOX_HEIGHT = 150; // Altura predefinida
+const BOX_HEIGHT = 200; // Altura predefinida
 const style = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#F5F5F5',
+        paddingTop: '18%',
+        height: '120%'
+    },
     mainContainer: {
         backgroundColor: '#dddddd',
         flexDirection: 'column',
@@ -251,15 +277,15 @@ const style = StyleSheet.create({
         height: BOX_HEIGHT,
         backgroundColor: '#f2f2f2',
         marginBottom: 20,
-        padding: 15,
+        padding: 20,
         borderRadius: 10,
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between'
     },
     image: {
-        width: 100,
-        height: 100, // cuadrada, misma anchura y altura
+        width: '90%',
+        height: 110, 
         borderRadius: 10,
         marginBottom: 10,
         backgroundColor: 'black',
@@ -268,17 +294,35 @@ const style = StyleSheet.create({
         justifyContent: 'center',
     },
     buttonsContainer: {
-        flexDirection: 'row',
+        paddingTop: 10,
+        flexDirection: 'row',    
         justifyContent: 'space-between',
+        width: '100%',          
+        paddingHorizontal: 5,
     },
     button: {
+        width: '40%',
+        height: 40,
+        backgroundColor: '#FDBC37',
+        borderRadius: 12,
         alignItems: 'center',
-        flex: 1,
+        justifyContent: 'center',
+        borderColor: 'black',
+        borderWidth: 2
     },
-    buttonText: {
-        marginTop: 5,
-        fontSize: 14,
-        textAlign: 'center',
+    button2: {
+        width: '40%',
+        height: 40,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: 'black',
+        borderWidth: 2
+    },
+    textButton: {
+        color: 'black',
+        fontSize: 18
     },
     modalBackground: {
         flex: 1,
@@ -291,21 +335,19 @@ const style = StyleSheet.create({
         padding: 20,
         backgroundColor: 'white',
         borderRadius: 10,
-        alignItems: 'center',
+        alignItems: 'left',
+        
     },
     modalText: {
         marginBottom: 20,
-        fontSize: 15,
-
+        fontSize: 14,
+        borderColor: 'black',
+        borderWidth: 1, 
     },
-    button: {
-        borderWidth: 1,
-        width: '70%',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        paddingVertical: 2,
-        shadowColor: 'black',
-        elevation: 1,
+    modalTextVer: {
+        marginBottom: 20,
+        fontSize: 14,
+        textAlign: 'center'
     },
 })
 
