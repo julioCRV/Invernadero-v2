@@ -18,7 +18,7 @@ const data = [
         feature: ['Control de Humedad', 'Riego por Goteo'],
     },
     {
-        id: '1',
+        id: '2',
         cod_controlador: "249978",
         image: require('../assets/zanahoria.png'),
         tipe: 'Invernadero de Zanahorias Orgánicas',

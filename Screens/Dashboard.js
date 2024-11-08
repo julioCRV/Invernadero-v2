@@ -21,89 +21,83 @@ const Dashboard = () => {
 
   return (
     <ImageBackground
-      source={require('../assets/fondo1.png')}
-      style={styles.container}
-      resizeMode="cover">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}>
-        <View>
-          {/* Título */}
-          <Text style={styles.title}>Dashboard</Text>
+  source={require('../assets/fondo1.png')}
+  style={styles.container}
+  resizeMode="cover">
+  <FlatList
+    data={sensorStatus}
+    keyExtractor={(item) => item.id}
+    showsVerticalScrollIndicator={false}
+    ListHeaderComponent={() => (
+      <View>
+        {/* Título */}
+        <Text style={styles.title}>Dashboard</Text>
 
-          {/* Gráfico de Línea para Temperatura */}
-          <Text style={styles.subtitle}>TEMPERATURA</Text>
-          <LineChart
-            data={{
-              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-              datasets: [{ data: data.temperature, color: () => '#ff6347', strokeWidth: 2 }],
-            }}
-            width={Dimensions.get('window').width - 40} // Ancho del gráfico
-            height={220} // Alto del gráfico
-            yAxisSuffix="°C"
-            chartConfig={{
-              backgroundColor: '#FFF',
-              backgroundGradientFrom: '#f5f5f5',
-              backgroundGradientTo: '#f5f5f5',
-              decimalPlaces: 1, // Mostramos 1 decimal
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              style: { borderRadius: 16 },
-              propsForDots: { r: '4', strokeWidth: '2', stroke: '#ffa726' },
-            }}
-            bezier // Suavizamos las líneas
-            style={{ marginVertical: 20, borderRadius: 16 }}
-          />
+        {/* Gráfico de Línea para Temperatura */}
+        <Text style={styles.subtitle}>TEMPERATURA</Text>
+        <LineChart
+          data={{
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            datasets: [{ data: data.temperature, color: () => '#ff6347', strokeWidth: 2 }],
+          }}
+          width={Dimensions.get('window').width - 40}
+          height={220}
+          yAxisSuffix="°C"
+          chartConfig={{
+            backgroundColor: '#FFF',
+            backgroundGradientFrom: '#f5f5f5',
+            backgroundGradientTo: '#f5f5f5',
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            style: { borderRadius: 16 },
+            propsForDots: { r: '4', strokeWidth: '2', stroke: '#ffa726' },
+          }}
+          bezier
+          style={{ marginVertical: 20, borderRadius: 16 }}
+        />
 
-          {/* Gráfico de Línea para Humedad */}
-          <Text style={styles.subtitle}>HUMEDAD</Text>
-          <LineChart
-            data={{
-              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-              datasets: [{ data: data.humidity, color: () => '#1e90ff', strokeWidth: 2 }],
-            }}
-            width={Dimensions.get('window').width - 40} // Ancho del gráfico
-            height={220} // Alto del gráfico
-            yAxisSuffix="%"
-            chartConfig={{
-              backgroundColor: '#FFF',
-              backgroundGradientFrom: '#f5f5f5',
-              backgroundGradientTo: '#f5f5f5',
-              decimalPlaces: 0, // Mostramos sin decimales
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              style: { borderRadius: 16 },
-              propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
-            }}
-            bezier // Suavizamos las líneas
-            style={{ marginVertical: 20, borderRadius: 16 }}
-          />
+        {/* Gráfico de Línea para Humedad */}
+        <Text style={styles.subtitle}>HUMEDAD</Text>
+        <LineChart
+          data={{
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            datasets: [{ data: data.humidity, color: () => '#1e90ff', strokeWidth: 2 }],
+          }}
+          width={Dimensions.get('window').width - 40}
+          height={220}
+          yAxisSuffix="%"
+          chartConfig={{
+            backgroundColor: '#FFF',
+            backgroundGradientFrom: '#f5f5f5',
+            backgroundGradientTo: '#f5f5f5',
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            style: { borderRadius: 16 },
+            propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
+          }}
+          bezier
+          style={{ marginVertical: 20, borderRadius: 16 }}
+        />
 
-          {/* Tabla de Registro de Estado de Sensores */}
-          <Text style={styles.subtitleTabla}>REGISTRO DE ESTADOS DE SENSORES</Text>
-          <FlatList
-            data={sensorStatus}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCell}>{item.date}</Text>
-                <Text style={styles.tableCell}>{item.time}</Text>
-                <Text style={styles.tableCell}>{item.device}</Text>
-                <Text style={styles.tableCell}>{item.status}</Text>
-              </View>
-            )}
-            ListHeaderComponent={() => (
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <Text style={styles.tableCell}>Fecha</Text>
-                <Text style={styles.tableCell}>Hora</Text>
-                <Text style={styles.tableCell}>Dispositivo</Text>
-                <Text style={styles.tableCell}>Estado</Text>
-              </View>
-            )}
-          />
-        </View>
-      </ScrollView>
-    </ImageBackground>
+        {/* Título para tabla */}
+        <Text style={styles.subtitleTabla}>REGISTRO DE ESTADOS DE SENSORES</Text>
+      </View>
+    )}
+    renderItem={({ item }) => (
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>{item.date}</Text>
+        <Text style={styles.tableCell}>{item.time}</Text>
+        <Text style={styles.tableCell}>{item.device}</Text>
+        <Text style={styles.tableCell}>{item.status}</Text>
+      </View>
+    )}
+    ListHeaderComponentStyle={{ marginBottom: 20 }}
+    ListFooterComponent={() => <View style={{ height: 20 }} />}
+  />
+</ImageBackground>
+
   );
 };
 

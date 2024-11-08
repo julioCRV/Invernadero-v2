@@ -75,10 +75,10 @@ export default function App() {
             headerTitleAlign: "center",
             headerTransparent: true,
             headerBackImage: () => (
-              <Ionicons 
-                name="arrow-back-circle-outline" 
-                size={35} 
-                // style={{ paddingLeft: 10}} 
+              <Ionicons
+                name="arrow-back-circle-outline"
+                size={35}
+              // style={{ paddingLeft: 10}} 
               />
             ),
             headerRight: () => (
@@ -97,10 +97,10 @@ export default function App() {
             headerTitleAlign: "center",
             headerTransparent: true,
             headerBackImage: () => (
-              <Ionicons 
-                name="arrow-back-circle-outline" 
-                size={35} 
-                // style={{ paddingLeft: 10}} 
+              <Ionicons
+                name="arrow-back-circle-outline"
+                size={35}
+              // style={{ paddingLeft: 10}} 
               />
             ),
             headerRight: () => (

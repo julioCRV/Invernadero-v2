@@ -1,22 +1,21 @@
 {
   "cli": {
-    "version": ">= 12.6.1",
+    "version": ">= 13.1.1",
     "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
     "production": {
-      "distribution": "store",
-      "android": {
-        "gradleCommand": ":app:assembleRelease" 
-      },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production"
     }
   },
   "submit": {

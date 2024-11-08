@@ -40,7 +40,7 @@ export default function LogIn(props) {
                 {/**Contenedor de Imagen */}
                 <View style={[style.imageContainer]}>
                     <Image
-                        source={require('../assets/fondoo.jpg')}
+                        source={require('../assets/imagenLogin.jpg')}
                         style={{ height: 250, width: 300, borderRadius: 30 }}
                     />
                 </View>
@@ -90,7 +90,7 @@ export default function LogIn(props) {
                     </View>
                     {/**Space */}
                     <View style={{ height: 20 }} />
-                    <Pressable style={style.button} onPress={ props.navigation.navigate('Lista')}>
+                    <Pressable style={style.button} onPress={logueo}>
                         <Text style={style.textButton}>Iniciar Sesion</Text>
                     </Pressable>
                 </View>
