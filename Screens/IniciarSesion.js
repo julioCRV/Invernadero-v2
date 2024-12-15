@@ -1,25 +1,30 @@
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, ImageBackground, View, Image } from "react-native"
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { useState } from "react";
+import { View, Text, TextInput, StyleSheet, Pressable, StatusBar, Image } from 'react-native';
+import Octicons from '@expo/vector-icons/Octicons';
+import Feather from '@expo/vector-icons/Feather';
+import React, { useState } from 'react';
 
-export default function LogIn(props) {
-    const [username, setUsername] = useState('')
+export default function LogIn({props, onLogin}) {
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [visible, setVisible] = useState(false);
+    const [text, setText] = useState('');
 
     const logueo = async () => {
+        console.log('Username:', username);
+        console.log('Password:', password);
         try {
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: username, password: password })
+                // body: JSON.stringify({ user_name: username, password: password })
+                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" })
             });
 
             const data = await res.json();
             if (res.ok) {
                 console.log('Login successful', data);
-                props.navigation.navigate('Lista');  // Navegar a la pantalla 'Lista'
+                onLogin();
+                // props.navigation.navigate('Inicio Invernadero');
             } else {
                 console.error('Login failed', data.message);
             }
@@ -30,146 +35,129 @@ export default function LogIn(props) {
 
 
     return (
-        <ImageBackground
-            source={require('../assets/fondo1.png')}
-            style={style.container}
-            resizeMode="cover"
-        >
-            <View
-                style={[style.mainContainer]}>
-                {/**Contenedor de Imagen */}
-                <View style={[style.imageContainer]}>
-                    <Image
-                        source={require('../assets/imagenLogin.jpg')}
-                        style={{ height: 250, width: 300, borderRadius: 30 }}
+        <View style={styles.container}>
+            <StatusBar backgroundColor={color.primary} />
+            <View style={styles.box}>
+                {/*Circle*/}
+                <Image
+                    source={require('../assets/imagenLogin2.png')}
+                    style={styles.containerImage}
+                />
+                <Text style={styles.title}>Bienvenido a Green Manager TC</Text>
+
+                <View style={styles.inputContainer}>
+                    <Octicons name="person" size={24} color="black" />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Nombre de usuario"
+                        placeholderTextColor={color.font}
+                        value={username}
+                        onChangeText={setUsername}
                     />
                 </View>
 
-                {/**Titulo */}
-                <Text style={[style.title, { paddingTop: 30 }]}>Bienvenido a </Text>
-                <Text style={style.title}>Green Manager TC</Text>
-                {/**Space */}
-                <View style={{ height: 20 }} />
-                {/**Inputs LogIn */}
-                <View style={[style.boxContainer, { width: '100%', height: 200 }]}>
-                    <View style={{ flexDirection: 'row', width: '100%', }}>
-                        <MaterialIcons name="person" size={30} color="#50BE5B" />
-                        <TextInput
-                            style={style.inputUsername}
-                            value={username}
-                            onChangeText={setUsername}
-                            placeholder="Nombre de Usuario"
-                            keyboardType="default" // Tipo de teclado para texto
-                            autoCapitalize="none" // Desactiva capitalización automática
-                        />
-                    </View>
+                <View style={styles.inputContainer}>
+                    <Feather name="unlock" size={24} color="black" />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Contraseña"
+                        placeholderTextColor={color.font}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={visible}
+                    />
 
-                    {/**Space */}
-                    <View style={{ height: 10 }} />
-
-                    <View style={{ flexDirection: 'row', width: '100%', }}>
-                        <MaterialIcons name="lock" size={30} color="#50BE5B" />
-                        <TextInput
-                            style={style.inputUsername}
-                            value={password}
-                            onChangeText={setPassword}
-                            placeholder="Ingresa tu contraseña"
-                            secureTextEntry={!showPassword} // Desactiva capitalización automática
-                        />
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                            style={style.icon}
-                            activeOpacity={0.8}
-                        >
-                            <FontAwesome5
-                                name={showPassword ? 'eye' : 'eye-slash'}
-                                size={22}
-                                color="#50BE5B"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                    {/**Space */}
-                    <View style={{ height: 20 }} />
-                    <Pressable style={style.button} onPress={logueo}>
-                        <Text style={style.textButton}>Iniciar Sesion</Text>
+                    <Pressable style={styles.iconEye} onPress={() => setVisible(!visible)}>
+                        {
+                            visible ? (<Feather name="eye-off" size={24} color="black" />) : (<Feather name="eye" size={24} color="black" />)
+                        }
                     </Pressable>
                 </View>
+
+
+                <Pressable title="Login" onPress={logueo} style={styles.button}>
+                    <Text style={styles.buttonText}>Iniciar Sesión</Text>
+                </Pressable>
             </View>
-        </ImageBackground>
+
+         
+        </View>
     )
 }
 
-const style = StyleSheet.create({
+const color = {
+    primary: '#A1B4AA',
+    font: '#25A256',
+
+}
+const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: '#F5F5F5',
-        paddingTop: '18%',
-        height: '120%'
-    },
-
-    mainContainer: {
-        // backgroundColor: '#dddddd',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: 35,
-    },
-    imageContainer: {
-        padding: 5,
-        // backgroundColor: '#000',
-        // borderWidth: 1,
-        borderRadius: 25,
-        flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center'
+        paddingHorizontal: 30,
+        paddingVertical: 90,
+        backgroundColor: '#AACCB2',
+    },
+    box: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: 'white',
+        borderColor: 'black',
+        borderWidth: 1,
+        borderRadius: 20,
     },
     title: {
         fontSize: 30,
-        color: 'black',
-        fontWeight: "400",
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 50,
+        color: color.font
+    },
+    input: {
+        height: 40,
+        paddingLeft: 18,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 15,
+        backgroundColor: color.primary,
+        paddingHorizontal: 10,
+        marginHorizontal: 20,
+        width: '100%'
+    },
+    iconEye: {
+        position: 'absolute',
+        right: 15
     },
     button: {
+        marginTop: 50,
+        backgroundColor: color.font,
+        marginHorizontal: 30,
+        height: 40,
+        borderRadius: 15,
+        justifyContent: 'center',
         width: '80%',
-        height: 50,
-        backgroundColor: '#59cf62',
-        borderRadius: 12,
         alignItems: 'center',
-        justifyContent: 'center'
-    },
-    textButton: {
         color: 'white',
-        fontSize: 18
+        borderColor: 'black', borderWidth: 1
     },
-    boxContainer: {
-        borderWidth: 1,
-        borderRadius: 20,
-        borderColor: 'black',
-        backgroundColor: 'white',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: 30
-    },
-    inputUsername: {
-        height: 30,
-        borderColor: 'gray',
-        borderWidth: 1,
-        paddingHorizontal: 10,
-        flex: 1,
-        borderRadius: 5
-    },
-    icon: {
-        padding: 5,
-        position: 'absolute',
-        right: 0
-    },
-    text: {
-        fontSize: 15,
-        color: 'black',
-        fontWeight: "500",
-    },
-    text2: {
-        fontSize: 15,
+    buttonText: {
         color: 'white',
-        fontWeight: "200",
+        fontSize: 16,
+        fontWeight: '300'
     },
-})
+    containerImage: {
+        width: 120,
+        height: 120,
+        backgroundColor: 'black',
+        borderRadius: 100,
+        marginBottom: 10
+    }
+
+});

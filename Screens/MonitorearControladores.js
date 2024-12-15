@@ -1,86 +1,157 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Switch, Image, TouchableOpacity, ImageBackground } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Switch, Image, TouchableOpacity, ImageBackground, Pressable } from "react-native";
 import { useRoute } from '@react-navigation/native';
-import {
-    incendiosoff, incendioson, manualoff, manualon, riegooff, riegoon, ventiladoroff,
-    ventiladoron, aireoff, aireon
-} from "../assets/estados/estados";
+import { calefaccion, humidificador, valvula, ventilacion } from "../assets/estados/estados";
+import { FontAwesomeIcon } from '@expo/vector-icons/FontAwesome6';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const MonitorearControladores = () => {
     const route = useRoute();
     const { item } = route.params;
-    // console.log("acccccccccccccccccccccc", item);
-
+    const [pressedKey, setPressedKey] = useState(null);
     const [data, setData] = useState(null);
 
-    // useEffect(() => {
-    //     const dataRef = ref(db);
-    //     onValue(dataRef, (snapshot) => {
-    //         const dataFromFirebase = snapshot.val();
-    //         setData(dataFromFirebase);
-    //     });
-    // }, []);
+    const fetchControllerInfo = async () => {
+        try {
+            const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    controller_code: item.cod_controlador
+                })
+            });
 
-    const [controllerInfo, setControllerInfo] = useState(null);
+            const data = await response.json();
 
-    useEffect(() => {
-        const fetchControllerInfo = async () => {
-            try {
-                const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        cod_controller: item.cod_controlador
-                    })
-                });
+            if (response.ok) {
+                // Verifica si data es un objeto y traduce las claves
+                if (data && typeof data === 'object') {
+                    const translatedData = {
+                        manual_heating: data.manual_heating,
+                        manual_humedifier: data.manual_humedifier,
+                        manual_valve: data.manual_valve,
+                        manual_ventilation: data.manual_ventilation,
+                        Temperatura: data.temperature,
+                        Humedad: data.humidity,
+                    };
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    setData(data[0]); // console.log(data[0]);Guarda la información recibida en el estado
+                    setData(translatedData); // Guarda los datos traducidos en el estado
                 } else {
-                    console.error('Error en la respuesta:', data.message);
+                    console.error('Los datos recibidos no tienen el formato esperado:', data);
                 }
-            } catch (error) {
-                console.error('Error en la solicitud:', error);
+            } else {
+                console.error('Error en la respuesta:', data.message);
             }
-        };
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
+    };
+    
+    useEffect(() => {
         fetchControllerInfo();
     }, []);
 
-    const handleChangeState = (key, newValue) => {
-        // if (data && data[key] !== undefined) {
-        //     const newData = {
-        //         ...data,
-        //         [key]: newValue
-        //     };
-        //     update(ref(db), newData)
-        //         .then(() => console.log("Valor actualizado correctamente"))
-        //         .catch((error) => console.error("Error al actualizar el valor:", error));
-        // }
+    const handleChangeState = async (sensorType, newValue) => {
+        const urlMap = {
+            manual_heating: 'https://gmb-tci.onrender.com/controller/update_manual_heating',
+            manual_humedifier: 'https://gmb-tci.onrender.com/controller/update_manual_humedifier',
+            manual_valve: 'https://gmb-tci.onrender.com/controller/update_manual_valve',
+            manual_ventilation: 'https://gmb-tci.onrender.com/controller/update_manual_ventilation',
+        };
+
+        const bodyMap = {
+            manual_heating: 'manual_heating',
+            manual_humedifier: 'manual_humedifier',
+            manual_valve: 'manual_valve',
+            manual_ventilation: 'manual_ventilation',
+        };
+
+        const url = urlMap[sensorType];
+        const bodyKey = bodyMap[sensorType];
+
+        if (!url || !bodyKey) {
+            console.error('Tipo de sensor no válido');
+            return;
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    controller_code: item.cod_controlador,
+                    [bodyKey]: newValue, // Usa el campo correspondiente al sensor
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await fetchControllerInfo(); // Llama al método para actualizar los datos
+                console.log('Datos actualizados');
+            } else {
+                console.error('Error en la respuesta:', data.message);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
     };
 
     const getImageSource = (key, value) => {
-        if (key.toLowerCase().includes('humidificacion')) {
-            return value ? manualon : manualoff;
+        if (key.toLowerCase().includes("manual humedifier")) {
+            return value ? humidificador : humidificador;
         }
-        if (key.toLowerCase().includes('contra incendios')) {
-            return value ? incendioson : incendiosoff;
+        if (key.toLowerCase().includes('manual valve')) {
+            return value ? valvula : valvula;
         }
-        if (key.toLowerCase().includes('bomba agua')) {
-            return value ? riegoon : riegooff;
+        if (key.toLowerCase().includes('manual ventilation')) {
+            return value ? ventilacion : ventilacion;
         }
-        if (key.toLowerCase().includes('ventilacion')) {
-            return value ? ventiladoron : ventiladoroff;
-        }
-        if (key.toLowerCase().includes('calefaccion')) {
-            return value ? aireon : aireoff;
+        if (key.toLowerCase().includes('manual heating')) {
+            return value ? calefaccion : calefaccion;
         }
     };
 
+    const getImageStyle = (value) => ({
+        tintColor: value ? 'green' : 'red',
+        transform: [{ scale: 1.4 }], // Aumenta el tamaño en un 10%
+    });
+
+
+    const getImageSource2 = (key) => {
+        if (key.toLowerCase().includes('manual_humedifier')) {
+            return humidificador;
+        }
+        if (key.toLowerCase().includes('manual_valve')) {
+            return valvula;
+        }
+        if (key.toLowerCase().includes('manual_ventilation')) {
+            return ventilacion;
+        }
+        if (key.toLowerCase().includes('manual_heating')) {
+            return calefaccion;
+        }
+    };
+
+    const getNombre = (key) => {
+
+        if (key.includes('manual_heating')) {
+            return 'Calefacción'
+        }
+        if (key.includes('manual_humedifier')) {
+            return 'Humidificador'
+        }
+        if (key.includes('manual_ventilation')) {
+            return 'Ventilación'
+        }
+        if (key.includes('manual_valve')) {
+            return 'Válvula de agua'
+        }
+    }
+
     return (
         <ImageBackground
-            source={require('../assets/fondo1.png')}
+            backgroundColor='#EDFDF2'
             style={styles.container}
             resizeMode="cover"
         >
@@ -89,82 +160,122 @@ const MonitorearControladores = () => {
                 showsHorizontalScrollIndicator={false}>
 
                 <Text style={styles.title}>{item.tipe}</Text>
+                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
+                    <Text style={styles.sectionTitle}>Sensores</Text>
+                    <View style={styles.cardsContainer1}>
+                        {data &&
+                            Object.entries(data)
+                                .filter(([, value]) => typeof value !== 'boolean')
+                                .map(([key, value]) => {
+                                    // Agrega los símbolos según la clave
+                                    const displayValue = key === 'Temperatura'
+                                        ? `${value}°C`
+                                        : key === 'Humedad'
+                                            ? `${value}%`
+                                            : value;
 
-                <Text style={styles.sectionTitle}>SENSORES:</Text>
-                <View style={styles.cardsContainer}>
-                    {data &&
-                        Object.entries(data)
-                            .filter(([, value]) => typeof value !== 'boolean')
-                            .map(([key, value]) => (
-                                <View key={key} style={styles.card}>
-                                    <Text style={styles.label}>{key.replace(/_/g, ' ')} </Text>
-                                    <Text style={styles.num}>{value}</Text>
-                                </View>
-                            ))}
+                                    // Selecciona el ícono según la clave
+                                    const iconName = key === 'Temperatura'
+                                        ? 'thermometer'
+                                        : key === 'Humedad'
+                                            ? 'tint'
+                                            : null;
+
+                                    return (
+                                        <View key={key} style={styles.card1}>
+                                            {iconName && (
+                                                <Icon
+                                                    name={iconName}
+                                                    size={20}
+                                                    color="#000"
+                                                    style={{ marginRight: 3, marginTop: -10, color: '#12862F' }}
+                                                />
+                                            )}
+                                            <Text style={styles.label}>
+                                                {key.replace(/_/g, ' ')}: {displayValue}
+                                            </Text>
+                                        </View>
+                                    );
+                                })}
+                    </View>
                 </View>
 
-                <Text style={styles.sectionTitle}>ESTADOS:</Text>
-                <View style={styles.cardsContainer}>
-                    {data &&
-                        Object.entries(data)
-                            .filter(([, value]) => typeof value === 'boolean')
-                            .map(([key, value]) => (
-                                <TouchableOpacity
-                                    key={key}
-                                    style={[
-                                        styles.card,
-                                        { backgroundColor: value ? '#FCA61D' : 'white' }, // Cambia el color de fondo según el valor de `value`
-                                    ]}
-                                    onPress={() => handleChangeState(key, !value)}
-                                >
-                                    <Text style={styles.labelEstados}>{key.replace(/_/g, ' ')}</Text>
-                                    <View style={styles.columnContainer}>
-                                        <View style={styles.imageContainerEstados}>
-                                            <Image
-                                                source={getImageSource(key.replace(/_/g, ' '), value)}
-                                                style={styles.statusImage}
-                                            />
-                                        </View>
-                                        <View style={styles.switchContainer}>
-                                            <Switch
-                                                value={value}
-                                                onValueChange={() => handleChangeState(key, !value)}
-                                                thumbColor="white"
-                                                trackColor={{ false: '#ccc', true: '#FFFF85' }} // Cambia el color del Switch cuando está activo
-                                            />
-                                        </View>
-                                    </View>
-                                    {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
-                                </TouchableOpacity>
-                            ))}
-                </View>
+                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
+                    <Text style={styles.sectionTitle}>Control Manual</Text>
+                    <View style={styles.cardsContainer}>
+                        {data &&
+                            Object.entries(data)
+                                .filter(([, value]) => typeof value === 'boolean')
+                                .map(([key, value]) => (
+                                    <TouchableOpacity
+                                        key={key}
+                                        style={[
+                                            styles.card,
+                                            { backgroundColor: value ? 'white' : 'white' }, // Cambia el color de fondo según el valor de `value`
+                                        ]}
+                                        onPress={() => handleChangeState(key, !value)}
+                                    >
+                                        <View style={styles.columnContainer}>
+                                            <View style={styles.columnLeft}>
+                                                <View style={styles.imageContainerEstados}>
+                                                    <Image
+                                                        source={getImageSource(key.replace(/_/g, ' '), value)}
+                                                        style={styles.statusImage}
+                                                    />
+                                                </View>
+                                                <Text style={styles.labelEstados}>{getNombre(key)}</Text>
+                                                {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
+                                            </View>
 
-                <Text style={styles.sectionTitle}>CONTROL MANUAL:</Text>
-                <View style={styles.cardsContainer}>
-                    {data &&
-                        Object.entries(data)
-                            .filter(([, value]) => typeof value === 'boolean')
-                            .map(([key, value]) => (
-                                <TouchableOpacity
-                                    key={key}
-                                    style={[
-                                        styles.cardControl,
-                                        { backgroundColor: value ? '#58C45E' : 'white' }, // Cambia el color de fondo según el valor de `value`
-                                    ]}
-                                    onPress={() => handleChangeState(key, !value)}
-                                >
-                                    <Text style={styles.label}>{key.replace(/_/g, ' ')}</Text>
-                                    <View style={styles.imageContainer}>
-                                        <Switch
-                                            value={value}
-                                            onValueChange={() => handleChangeState(key, !value)}
-                                            thumbColor="white"
-                                            trackColor={{ false: '#ccc', true: '#FFFF85' }} // Cambia el color del Switch cuando está activo
-                                        />
+                                            <View style={styles.columnRight}>
+                                                <Switch
+                                                    value={value}
+                                                    onValueChange={() => handleChangeState(key, !value)}
+                                                    thumbColor="white"
+                                                    trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
+                                                />
+                                            </View>
+                                        </View>
                                         {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+                                    </TouchableOpacity>
+                                ))}
+                    </View>
+                </View>
+
+                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, height: 230 }}>
+                    <Text style={styles.sectionTitle}>Controladores Automáticos</Text>
+                    <View style={styles.cardsContainer2}>
+                        {data &&
+                            Object.entries(data)
+                                .filter(([, value]) => typeof value === 'boolean')
+                                .map(([key, value]) => (
+                                    <Pressable
+                                        key={key}
+                                        style={({ pressed }) => [
+                                            styles.card2,
+                                            {
+                                                backgroundColor: value ? 'white' : '#f0f0f0',
+                                                opacity: pressed ? 1 : 1, // Mantén la opacidad fija incluso al presionar
+                                            },
+                                        ]}
+                                        onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
+                                        onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar
+                                        onPress={() => handleChangeState(key, !value)}
+                                    >
+                                        <View style={styles.imageContainerEstados2}>
+                                            <Image
+                                                source={getImageSource2(key)}
+                                                style={[styles.statusImage2, getImageStyle(value)]} // Agrega el estilo dinámico
+                                            />
+                                        </View>
+
+                                        {pressedKey === key && (
+                                            <Text style={styles.pressedText}>{getNombre(key)}</Text> // Mostrar texto
+                                        )}
+                                    </Pressable>
+
+                                ))}
+                    </View>
                 </View>
 
             </ScrollView>
@@ -176,14 +287,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 18,
-        paddingTop: '18%',
+        paddingTop: '7%',
         height: '120%'
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
         marginBottom: 20,
-        // color: '#8dfdc0',
+        color: '#12682F',
         textAlign: 'center',
     },
     sectionTitle: {
@@ -191,20 +302,73 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 15,
         marginBottom: 10,
-        color: '#000',
+        color: '#12682F',
+    },
+    cardsContainer1: {
+        flexDirection: 'row', // Los elementos se distribuyen en filas
+        flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
+        justifyContent: 'space-between', // Espacio uniforme entre elementos
+    },
+
+    cardsContainer2: {
+        flexDirection: 'row', // Los elementos se distribuyen en filas
+        flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
+        justifyContent: 'space-between', // Espacio uniforme entre elementos
+        padding: 10,
+    },
+    card2: {
+        width: '30%', // Tres elementos por fila
+        aspectRatio: 1, // Mantiene el elemento cuadrado
+        marginBottom: 10, // Espaciado entre filas
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    imageContainerEstados2: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    statusImage2: {
+        width: 20,
+        height: 20,
+    },
+    pressedText: {
+        position: 'absolute',
+        bottom: 70,
+        textAlign: 'center',
+        backgroundColor: '#f0f0f0',
+        opacity: 10,
+        color: 'black',
+        padding: 5,
+        borderRadius: 5,
+        fontSize: 15,
+        borderWidth: 0.2,
+        width: 100,
+    },
+
+    card1: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        // marginBottom: 10,
+        padding: 10,
+        // borderWidth: 1,
+        // borderColor: '#ccc',
+        // borderRadius: 8,
     },
     cardsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-
+        paddingBottom: 0
     },
     card: {
-        width: '48%',
+        // width: '48%',
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         padding: 10,
-        marginBottom: 15,
+        marginBottom: 30,
     },
     cardControl: {
         width: '48%',
@@ -243,46 +407,64 @@ const styles = StyleSheet.create({
     },
     labelEstados: {
         fontSize: 16,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
         marginBottom: 10,
         textAlign: 'center'
     },
     label: {
         fontSize: 16,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
         marginBottom: 10,
+        // color: '#12682F',
     },
     imageContainer: {
         flexDirection: 'column',
         alignItems: 'center',
     },
-    columnContainer: {
-        flexDirection: 'row', // Establece la dirección en fila
-        alignItems: 'center', // Centra verticalmente los elementos en la fila
-        justifyContent: 'center', // Opcional: centra horizontalmente la fila
-    },
     imageContainerEstados: {
+        marginTop: -9,
+        paddingRight: 10, // Espacio entre el círculo y el switch
+    },
+    columnContainer: {
+        width: '100%',
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#EAE9E5',
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        marginRight: 10, // Espacio entre el círculo y el switch
+        justifyContent: 'space-between', // Distribuye los hijos entre los extremos
+        position: 'relative',
+        marginBottom: -40,
     },
-    switchContainer: {
-        alignItems: 'center', // Centra el switch verticalmente dentro de su contenedor
+    columnContainer2: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between', // Distribuye los hijos entre los extremos
+        position: 'relative',
+        marginBottom: -40,
     },
-    statusImage: {
-        width: 40,
-        height: 40,
+    columnLeft: {
+        // Alineación del hijo izquierdo
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
+    columnRight: {
+        // marginBottom: 1,
+        // Alineación del hijo derecho
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+
+    statusImage: {  // borderColor: 'black',borderWidth: 1,
+        width: 18,
+        height: 18,
         // marginRight: 10,
     },
     num: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#fa6900',
+        // color: '#fa6900',
 
     },
 });

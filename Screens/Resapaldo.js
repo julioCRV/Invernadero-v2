@@ -17,15 +17,6 @@ const Dashboard = () => {
   const [dataTabla, setDataTabla] = useState(null);
   const [dataGrafica, setDataGrafica] = useState(null);
   const [historicalData, setHistoricalData] = useState([]); // Estado para acumular datos históricos
-  const historicalData2 = [
-    { temperature: 30, humidity: 20, receivedAt: "20:41:34" },
-    { temperature: 28, humidity: 22, receivedAt: "20:42:34" },
-    { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }
-  ];
 
   const fetchControllerInfo = async () => {
     try {
@@ -174,7 +165,7 @@ const Dashboard = () => {
                       datasets: [
                         {
                           data: processedData,
-                          color: () => '#419D80',
+                          color: () => '#ff6347',
                           strokeWidth: 2,
                         },
                       ],
@@ -190,7 +181,7 @@ const Dashboard = () => {
                       color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                       style: { borderRadius: 16 },
-                      propsForDots: { r: '4', strokeWidth: '2', stroke: 'dark' },
+                      propsForDots: { r: '4', strokeWidth: '2', stroke: '#ffa726' },
                     }}
                     bezier
                     style={{ marginVertical: 20, borderRadius: 16 }}
@@ -211,38 +202,27 @@ const Dashboard = () => {
                 />
                 <Text style={styles.subtitle}> Humedad</Text>
               </View>
-              {historicalData.length > 0 ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <LineChart
-                    data={{
-                      labels: labels.length > 0 ? labels : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                      datasets: [
-                        {
-                          data: processedData,
-                          color: () => '#749FE2', strokeWidth: 2
-                        }],
-
-                    }}
-                    width={Math.max(Dimensions.get('window').width - 40, labels.length * 50)}
-                    height={220}
-                    yAxisSuffix="%"
-                    chartConfig={{
-                      backgroundColor: '#FFF',
-                      backgroundGradientFrom: '#FFF',
-                      backgroundGradientTo: '#FFF',
-                      decimalPlaces: 0,
-                      color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                      style: { borderRadius: 16 },
-                      propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
-                    }}
-                    bezier
-                    style={{ marginVertical: 20, borderRadius: 16 }}
-                  />
-                </ScrollView>
-              ) : (
-                <Text></Text>
-              )}
+              <LineChart
+                data={{
+                  labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                      datasets: [{ data: data.temperature, color: () => '#ff6347', strokeWidth: 2 }],
+                }}
+                width={Dimensions.get('window').width - 40}
+                height={220}
+                yAxisSuffix="%"
+                chartConfig={{
+                  backgroundColor: '#FFF',
+                  backgroundGradientFrom: '#FFF',
+                  backgroundGradientTo: '#FFF',
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  style: { borderRadius: 16 },
+                  propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
+                }}
+                bezier
+                style={{ marginVertical: 20, borderRadius: 16 }}
+              />
             </View>
 
             {/* Título para tabla */}

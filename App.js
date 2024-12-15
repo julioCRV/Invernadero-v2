@@ -1,20 +1,103 @@
 
-import { StyleSheet, ImageBackground } from 'react-native';
+import { StyleSheet, ImageBackground, Text, View, Button, TouchableOpacity, Image } from 'react-native';
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+
 import InicioInvernadero from './Screens/InicioInvernadero';
 import IniciarSesion from './Screens/IniciarSesion';
 import MonitorearControladores from './Screens/MonitorearControladores';
-import Dashboard from './Screens/Dashboard'
-import { Feather, Ionicons } from '@expo/vector-icons';
+import Dashboard from './Screens/Dashboard';
+import Nosotros from './Screens/About';
 
-const VistaInicio = ({ navigation }) => {
+import IconPlanta from './assets/iconPlanta.png';
 
+
+// Crear el Tab Navigator
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// Stack Navigator para Monitorear y Dashboard
+const MainStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Inicio" component={InicioInvernadero} />
+      <Stack.Screen name="Monitorear" component={MonitorearControladores} />
+      <Stack.Screen name="Dashboard" component={Dashboard} />
+    </Stack.Navigator>
+  );
+};
+
+const MyTabs = ({ handleLogout }) => {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: {
+          height: 60,
+          paddingTop: 10,
+          backgroundColor: '#19A44E', // Fondo de la barra de navegación
+        },
+        tabBarActiveTintColor: 'white', // Color de los iconos activos
+        tabBarInactiveTintColor: 'black', // Color de los iconos inactivos
+        headerShown: false, // Oculta los encabezados individuales
+        tabBarShowLabel: false,
+
+      }}
+    >
+      <Tab.Screen
+        name="Invernaderos"
+        component={MainStack}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={IconPlanta} // Usa la imagen
+              style={{
+                width: 24, // Ajusta el tamaño
+                height: 24,
+                tintColor: focused ? 'white' : '#000', // Cambia el color según el estado
+              }}
+              resizeMode="contain" // Mantiene las proporciones
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Nosotros"
+        component={Nosotros}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="info" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Cerrar Sesión"
+        component={() => null} // No muestra un componente
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="user-circle-o" color={color} size={size} />
+          ),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={handleLogout} // Cierra la sesión
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+
+
+const VistaInicio = ({ onFinish }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
-      navigation.replace('IniciarSesion');
+      onFinish(); // Llama a la función cuando se debe terminar la vista inicial
     }, 3000);
 
     return () => clearTimeout(timeout);
@@ -25,106 +108,53 @@ const VistaInicio = ({ navigation }) => {
       source={require('./assets/fondoInicial.png')}
       style={styles.container}
       resizeMode="cover"
-    >
-    </ImageBackground>
+    />
   );
 };
 
-const HomeScreen = ({ navigation }) => {
-  return (
-    <InicioInvernadero navigation={navigation} />
-  );
-};
-
+// App principal con navegación
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
-  const Stack = createStackNavigator();
-
-  function MyStack() {
-
-    return (
-      <Stack.Navigator initialRouteName="VistaInicio">
-        <Stack.Screen name="VistaInicio" component={VistaInicio} options={{ headerShown: false }} />
-
-        <Stack.Screen name='IniciarSesion' component={IniciarSesion}
-          options={{
-            title: " ",
-            // headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerTransparent: true,
-          }} />
-        <Stack.Screen name='Lista' component={HomeScreen}
-          options={({ navigation }) => ({
-            title: " ",
-            headerStyle: { backgroundColor: "#FCB03E" },
-            headerTransparent: true,
-            headerRight: () => (
-              <Feather
-                name="log-out"
-                size={30}
-                style={{ paddingRight: 5 }}
-                onPress={() => navigation.navigate('IniciarSesion')}
-              />
-            ),
-            headerLeft: () => null,
-          })} />
-        <Stack.Screen name="Monitorear" component={MonitorearControladores}
-          options={({ navigation }) => ({
-            title: " ",
-            // headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerTransparent: true,
-            headerBackImage: () => (
-              <Ionicons
-                name="arrow-back-circle-outline"
-                size={35}
-              // style={{ paddingLeft: 10}} 
-              />
-            ),
-            headerRight: () => (
-              <Feather
-                name="log-out"
-                size={30}
-                style={{ paddingRight: 5 }}
-                onPress={() => navigation.navigate('IniciarSesion')}
-              />
-            ),
-          })} />
-        <Stack.Screen name="Dashboard" component={Dashboard}
-          options={({ navigation }) => ({
-            title: " ",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerTransparent: true,
-            headerBackImage: () => (
-              <Ionicons
-                name="arrow-back-circle-outline"
-                size={35}
-              // style={{ paddingLeft: 10}} 
-              />
-            ),
-            headerRight: () => (
-              <Feather
-                name="log-out"
-                size={30}
-                style={{ paddingRight: 5 }}
-                onPress={() => navigation.navigate('IniciarSesion')}
-              />
-            ),
-          })} />
-      </Stack.Navigator>
-    )
-  }
+  const handleLogin = () => setIsAuthenticated(true);
+  const handleLogout = () => setIsAuthenticated(false);
+  const handleIntroFinish = () => setShowIntro(false);
 
   return (
     <NavigationContainer>
-      <MyStack />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Pantalla inicial */}
+        {showIntro && (
+          <Stack.Screen name="VistaInicio">
+            {(props) => <VistaInicio {...props} onFinish={handleIntroFinish} />}
+          </Stack.Screen>
+        )}
+        {/* Autenticación */}
+        {!isAuthenticated && !showIntro && (
+          <Stack.Screen name="IniciarSesion">
+            {(props) => <IniciarSesion {...props} onLogin={handleLogin} />}
+          </Stack.Screen>
+        )}
+        {/* Navegación principal */}
+        {isAuthenticated && (
+          <>
+            <Stack.Screen name="Main">
+              {(props) => <MyTabs {...props} handleLogout={handleLogout} />}
+            </Stack.Screen>
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
-
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

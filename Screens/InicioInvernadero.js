@@ -1,12 +1,15 @@
-import { Dimensions, FlatList, Image, Modal, Pressable, ImageBackground, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
-import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Dimensions, FlatList, Image, Modal, Pressable, StatusBar, ImageBackground, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Octicons from '@expo/vector-icons/Octicons';
 import Foundation from '@expo/vector-icons/Foundation';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import IconPlanta from '../assets/iconPlanta.png';
 
 const data = [
     {
@@ -67,7 +70,7 @@ const BoxItem = ({ item, }) => {
     }
     const goDashboard = () => {
         //Click en Dashboard
-        navigation.navigate('Dashboard');
+        navigation.navigate('Dashboard', { item });
     }
     const goEditar = () => {
         //Click en Editar
@@ -91,7 +94,8 @@ const BoxItem = ({ item, }) => {
     };
 
     return (
-        <View style={style.box}>
+        <View style={styles.box}>
+
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -103,97 +107,107 @@ const BoxItem = ({ item, }) => {
                         {/* Botón de cerrar */}
                         <Pressable
                             onPress={() => setModalVisible(false)}
-                            style={{ position: 'absolute', right: 10, top: 5, borderRadius: 100, borderColor: 'black', borderWidth: 1, width: 25, height: 25 }}
+                            style={styles.closeButton}
                         >
-                            <Text style={{ textAlign: 'center' }}>x</Text>
+                            <Icon name="close" size={20} color="black" />
                         </Pressable>
-                        {isVisible && (
-                            <Pressable style={{ alignItems: 'center', marginRight: 230 }} onPress={goEditar}>
-                                <Foundation name="page-edit" size={24} color="black" />
-                                <Text style={{ fontSize: 10 }}>Editar</Text>
-                            </Pressable>
-                        )}
 
-                        {/* Modo de Edición o Vista */}
+
+
+                        {/* Vista de modo de edición*/}
                         {isEditing ? (
                             <>
-                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Titulo:</Text>
-                                <TextInput
-                                    style={style.modalText}
-                                    value={editedData.tipe}
-                                    onChangeText={(value) => handleInputChange('tipe', value)}
-                                />
-                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
-                                <TextInput
-                                    value={editedData.description}
-                                    onChangeText={(value) => handleInputChange('description', value)}
-                                    multiline={true} // Permite múltiples líneas
-                                    numberOfLines={4} // Número de líneas visibles por defecto
-                                    style={{borderColor: 'black', borderWidth: 1}}
-                                />
-                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
-                                {editedData.feature.map((item, index) => (
+                                <Text style={style.modalTitulo}>Editar detalles</Text>
+                                <View style={{ padding: 15 }}>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', paddingTop: 30, color: '#12682F' }}>Titulo:</Text>
                                     <TextInput
-                                    style={{borderColor: 'black', borderWidth: 1}}
-                                        key={index}
-                                        value={item}
-                                        onChangeText={(value) => {
-                                            const newFeatures = [...editedData.feature];
-                                            newFeatures[index] = value;
-                                            setEditedData({ ...editedData, feature: newFeatures });
-                                        }}
-                                        multiline={true} // Permite múltiples líneas
-                                        numberOfLines={1} // Número de líneas visibles por defecto
+                                        style={style.modalText}
+                                        value={editedData.tipe}
+                                        onChangeText={(value) => handleInputChange('tipe', value)}
                                     />
-                                ))}
-                                <View style={style.buttonsContainer}>
-                                    <Pressable style={style.button2} onPress={() => setModalVisible(false)} >
-                                        <Text style={style.textButton}>Cancelar</Text>
-                                    </Pressable>
-                                    <Pressable style={style.button} onPress={handleSave}>
-                                        <Text style={style.textButton}>Guardar</Text>
-                                    </Pressable>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Descripción:</Text>
+                                    <TextInput
+                                        value={editedData.description}
+                                        onChangeText={(value) => handleInputChange('description', value)}
+                                        multiline={true} // Permite múltiples líneas
+                                        numberOfLines={20} // Número de líneas visibles por defecto
+                                        style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, }}
+                                    />
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Invernadero:</Text>
+                                    {editedData.feature.map((item, index) => (
+                                        <TextInput
+                                            style={{ borderColor: 'black', borderWidth: 1 }}
+                                            key={index}
+                                            value={item}
+                                            onChangeText={(value) => {
+                                                const newFeatures = [...editedData.feature];
+                                                newFeatures[index] = value;
+                                                setEditedData({ ...editedData, feature: newFeatures });
+                                            }}
+                                            multiline={true} // Permite múltiples líneas
+                                            numberOfLines={1} // Número de líneas visibles por defecto
+                                        />
+                                    ))}
+                                    <View style={style.buttonsContainer}>
+                                        <Pressable style={style.button2} onPress={() => setModalVisible(false)} >
+                                            <Text style={style.textButton}>Cancelar</Text>
+                                        </Pressable>
+                                        <Pressable style={style.button} onPress={handleSave}>
+                                            <Text style={style.textButton}>Guardar</Text>
+                                        </Pressable>
+                                    </View>
                                 </View>
-
 
                             </>
                         ) : (
                             <>
+                                <Text style={style.modalTitulo}>Detalles</Text>
+                                <Pressable style={{ alignItems: 'center', marginRight: 220, marginBottom: 20 }} onPress={goEditar}>
+                                    <Foundation name="page-edit" size={24} color="black" />
+                                    <Text style={{ fontSize: 15 }}>Editar</Text>
+                                </Pressable>
                                 <Text style={style.modalTextVer} numberOfLines={2}>{item.tipe}</Text>
-                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Descripción:</Text>
-                                <Text>{item.description}</Text>
-                                <Text style={{ alignSelf: 'flex-start', fontWeight: '700' }}>Tipo de Invernadero:</Text>
-                                {item.feature.map((item, index) => (
-                                    <Text key={index}>*{item}</Text>
-                                ))}
+                                <View style={{ margin: 20 }}>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Descripción:</Text>
+                                    <Text style={{ fontSize: 16, marginBottom: 20 }}>{item.description}</Text>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Tipo de Invernadero:</Text>
+                                    {item.feature.map((item, index) => (
+                                        <Text style={{ fontSize: 16 }} key={index}>* {item}</Text>
+                                    ))}
+                                </View>
                             </>
                         )}
-
                         <Pressable title="Close" onPress={() => setModalVisible(false)} />
                     </View>
                 </View>
             </Modal>
             {/**el item.image debe entrar en un elemento imagen con uri */}
-            <View >
-                <Image
-                    source={item.image} // Ruta relativa a la imagen local
-                    style={{ width: 100, height: 100 }} // Ajusta el tamaño de la imagen
-                />
-            </View>
-            <View style={{ flexDirection: 'row'}}>
-                <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goDetalles()}>
-                    <FontAwesome name="file-text-o" size={24} color="black" />
-                    <Text style={{ fontSize: 10 }}>Detalles</Text>
-                </Pressable>
-                <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goMonitorear()}>
-                    <FontAwesome6 name="sun-plant-wilt" size={24} color="black" />
-                    <Text style={{ fontSize: 10 }}>Monitorear</Text>
-                </Pressable>
-                <Pressable style={{ alignItems: 'center', marginRight: 5 }} onPress={() => goDashboard()}>
-                    <Octicons name="graph" size={24} color="black" />
-                    <Text style={{ fontSize: 10 }}>Dashboard</Text>
-                </Pressable>
 
+            <Image
+                source={item.image} // Ruta relativa a la imagen local
+                style={{ width: 200, height: 100 }} // Ajusta el tamaño de la imagen
+            />
+            <Text style={styles.title2}>{item.tipe}</Text>
+
+            <StatusBar backgroundColor={color.font} />
+            {/* <Text style={styles.text}>{item.description}</Text> */}
+            {/**Buttons */}
+            <View style={styles.boxButtons}>
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear()}>
+                    <Image
+                        source={IconPlanta} // Usa la imagen
+                        style={{ width: 24, height: 24, }}
+                    />
+                    <Text>Monitorear</Text>
+                </Pressable>
+                <Pressable style={[styles.button, { backgroundColor: 'orange' }]} onPress={() => goDetalles()}>
+                    <Ionicons name="newspaper-outline" size={24} color="black" />
+                    <Text>Detalles</Text>
+                </Pressable>
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goDashboard()}>
+                    <Octicons name="graph" size={24} color="black" />
+                    <Text>Dashboard</Text>
+                </Pressable>
             </View>
         </View>
     )
@@ -202,42 +216,147 @@ const BoxItem = ({ item, }) => {
 
 
 export default function GreenManagerTc(props) {
-
+    const navigation = useNavigation();
     const back = () => {
         {/**FUNCION PARA SALIR CON EL BOTON SUPERIOR DERECHO */ }
     }
 
     return (
-        <ImageBackground
-            source={require('../assets/fondo1.png')}
-            style={style.container}
-            resizeMode="cover"
-        >
-
-            {/**Space */}
-
-            {/**Caja del titulo */}
-
-            <View style={style.boxTitle}>
-                <Text style={style.title}>Green Manager TC</Text>
+        <View style={styles.container}>
+            <View style={styles.topBox}>
+                {/* <Ionicons name="arrow-back-circle-outline" size={35} color="black" onPress={() => navigation.navigate('IniciarSesion')} /> */}
+                <Text style={styles.topTitle}>Green Manager TC</Text>
+                {/* <Feather name="log-out" size={28} color="black" onPress={() => navigation.navigate('IniciarSesion')} /> */}
             </View>
-            <Text style={{ fontSize: 20 }}>Invernaderos</Text>
-            <View style={{ height: 20 }} />
-            {/**Lista de GreenHouses */}
-
-
-            <FlatList
-                data={data}
-                renderItem={({ item }) => <BoxItem item={item} />}
-                keyExtractor={item => item.id}
-            // contentContainerStyle={style.container}
-            />
-
-
-        </ImageBackground>
+            <View style={styles.bodybox}>
+                <Text style={styles.title}>Mis Invernaderos</Text>
+                <FlatList
+                    data={data}
+                    renderItem={({ item }) => <BoxItem item={item} />}
+                    keyExtractor={item => item.id}
+                // contentContainerStyle={style.container}
+                />
+            </View>
+        </View>
     )
 }
 
+
+const color = {
+    primary: '#A1B4AA',
+    font: '#25A256',
+
+}
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    topBox: {
+        width: '100%',
+        height: '10%',
+        backgroundColor: color.font,
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center'
+    },
+    bodybox: {
+        width: '100%',
+        height: '90%',
+        backgroundColor: '#EDFDF2',
+        padding: 20
+    },
+    box: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: 'white',
+        borderColor: 'black',
+        borderWidth: 1,
+        marginVertical: 15,
+        marginHorizontal: 5,
+    },
+    title: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        color: color.font,
+    },
+    title2: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: color.font,
+        textAlign: 'center'
+    },
+    topTitle: {
+        fontSize: 28,
+        fontWeight: 500,
+        width: '70%',
+        textAlign: 'center'
+    },
+    input: {
+        height: 40,
+        paddingLeft: 18,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 15,
+        backgroundColor: color.primary,
+        paddingHorizontal: 10,
+        marginHorizontal: 20,
+        width: '100%'
+    },
+    iconEye: {
+        position: 'absolute',
+        right: 15
+    },
+    button: {
+        height: 70,
+        width: '32%',
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        color: 'white'
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '300'
+    },
+    containerImage: {
+        width: '93%',
+        height: 120,
+        backgroundColor: 'black',
+        marginBottom: 10
+    },
+    text: {
+        color: color.font,
+        fontSize: 18,
+        fontWeight: 700
+    },
+    boxButtons: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10
+    },
+    closeButton: {
+        position: 'absolute',
+        right: 10,
+        top: 5,
+        borderRadius: 25, // Hace el botón circular
+        borderColor: 'black',
+        backgroundColor: '#FF1014',
+        borderWidth: 1,
+        width: 30, // Aumenta para mayor área de toque
+        height: 30, // Aumenta para mayor área de toque
+        justifyContent: 'center', // Centra el ícono horizontalmente
+        alignItems: 'center', // Centra el ícono verticalmente
+    },
+});
 
 const { height } = Dimensions.get('window')
 
@@ -245,6 +364,7 @@ const TITLE_HEIGHT = 70;
 const FLATLIST_HEIGHT = height - 50 - TITLE_HEIGHT;
 
 const BOX_HEIGHT = 200; // Altura predefinida
+
 const style = StyleSheet.create({
     container: {
         flex: 1,
@@ -285,7 +405,7 @@ const style = StyleSheet.create({
     },
     image: {
         width: '90%',
-        height: 110, 
+        height: 110,
         borderRadius: 10,
         marginBottom: 10,
         backgroundColor: 'black',
@@ -294,27 +414,27 @@ const style = StyleSheet.create({
         justifyContent: 'center',
     },
     buttonsContainer: {
-        paddingTop: 10,
-        flexDirection: 'row',    
-        justifyContent: 'space-between',
-        width: '100%',          
-        paddingHorizontal: 5,
+        paddingTop: 30,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
     },
     button: {
-        width: '40%',
+        width: '50%',
         height: 40,
-        backgroundColor: '#FDBC37',
-        borderRadius: 12,
+        backgroundColor: '#19A44E',
+        borderRadius: 7,
         alignItems: 'center',
         justifyContent: 'center',
         borderColor: 'black',
-        borderWidth: 2
+        borderWidth: 2,
     },
     button2: {
-        width: '40%',
+        width: '50%',
         height: 40,
-        backgroundColor: 'white',
-        borderRadius: 12,
+        backgroundColor: '#F7943F',
+        borderRadius: 7,
         alignItems: 'center',
         justifyContent: 'center',
         borderColor: 'black',
@@ -336,19 +456,22 @@ const style = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         alignItems: 'left',
-        
+
     },
     modalText: {
         marginBottom: 20,
         fontSize: 14,
         borderColor: 'black',
-        borderWidth: 1, 
+        borderWidth: 1,
     },
     modalTextVer: {
-        marginBottom: 20,
-        fontSize: 14,
+        color: '#12682F',
+        fontSize: 20,
         textAlign: 'center'
     },
+    modalTitulo: {
+        color: '#12682F',
+        fontSize: 25,
+        textAlign: 'center',
+    }
 })
-
-
