@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Switch, Image, TouchableOpacity, ImageBackground, Pressable } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Switch, Image, Modal, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator } from "react-native";
 import { useRoute } from '@react-navigation/native';
-import { calefaccion, humidificador, valvula, ventilacion } from "../assets/estados/estados";
+import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
 import { FontAwesomeIcon } from '@expo/vector-icons/FontAwesome6';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -10,6 +10,8 @@ const MonitorearControladores = () => {
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
     const [data, setData] = useState(null);
+    const [dataAutomatica, setDataAutomatica] = useState(null);
+    const [loading, setLoading] = useState(false); // Estado de carga
 
     const fetchControllerInfo = async () => {
         try {
@@ -35,7 +37,24 @@ const MonitorearControladores = () => {
                         Humedad: data.humidity,
                     };
 
-                    setData(translatedData); // Guarda los datos traducidos en el estado
+                    const translatedData2 = {
+                        conection_controller: data.conection_controller,
+                        stable_humidity: data.stable_humidity,
+                        stable_temperature: data.stable_temperature,
+
+                        heating_activated: data.heating_activated,
+                        heating_desactivated: data.heating_deactivated,
+                        humedifier_activated: data.humedifier_activated,
+                        humedifier_desactivated: data.humedifier_deactivated,
+                        valve_activated: data.valve_activated,
+                        valve_desactivated: data.valve_deactivated,
+                        ventilation_activated: data.ventilation_activated,
+                        ventilation_desactivated: data.ventilation_deactivated,
+
+                    };
+
+                    setData(translatedData);
+                    setDataAutomatica(translatedData2);
                 } else {
                     console.error('Los datos recibidos no tienen el formato esperado:', data);
                 }
@@ -46,54 +65,71 @@ const MonitorearControladores = () => {
             console.error('Error en la solicitud:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchControllerInfo();
     }, []);
 
+    useEffect(() => {
+        fetchControllerInfo(); // Llamada inicial
+
+        const interval = setInterval(() => {
+            fetchControllerInfo(); // Llamada cada 2 segundos
+        }, 10000);
+
+        // Limpieza del intervalo
+        return () => clearInterval(interval);
+    }, []);
+
     const handleChangeState = async (sensorType, newValue) => {
-        const urlMap = {
-            manual_heating: 'https://gmb-tci.onrender.com/controller/update_manual_heating',
-            manual_humedifier: 'https://gmb-tci.onrender.com/controller/update_manual_humedifier',
-            manual_valve: 'https://gmb-tci.onrender.com/controller/update_manual_valve',
-            manual_ventilation: 'https://gmb-tci.onrender.com/controller/update_manual_ventilation',
-        };
+        if (dataAutomatica.conection_controller) {
+            const urlMap = {
+                manual_heating: 'https://gmb-tci.onrender.com/controller/update_manual_heating',
+                manual_humedifier: 'https://gmb-tci.onrender.com/controller/update_manual_humedifier',
+                manual_valve: 'https://gmb-tci.onrender.com/controller/update_manual_valve',
+                manual_ventilation: 'https://gmb-tci.onrender.com/controller/update_manual_ventilation',
+            };
 
-        const bodyMap = {
-            manual_heating: 'manual_heating',
-            manual_humedifier: 'manual_humedifier',
-            manual_valve: 'manual_valve',
-            manual_ventilation: 'manual_ventilation',
-        };
+            const bodyMap = {
+                manual_heating: 'manual_heating',
+                manual_humedifier: 'manual_humedifier',
+                manual_valve: 'manual_valve',
+                manual_ventilation: 'manual_ventilation',
+            };
 
-        const url = urlMap[sensorType];
-        const bodyKey = bodyMap[sensorType];
+            const url = urlMap[sensorType];
+            const bodyKey = bodyMap[sensorType];
 
-        if (!url || !bodyKey) {
-            console.error('Tipo de sensor no válido');
-            return;
-        }
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    controller_code: item.cod_controlador,
-                    [bodyKey]: newValue, // Usa el campo correspondiente al sensor
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                await fetchControllerInfo(); // Llama al método para actualizar los datos
-                console.log('Datos actualizados');
-            } else {
-                console.error('Error en la respuesta:', data.message);
+            if (!url || !bodyKey) {
+                console.error('Tipo de sensor no válido');
+                return;
             }
-        } catch (error) {
-            console.error('Error en la solicitud:', error);
+
+            setLoading(true); // Inicia el estado de carga
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        controller_code: item.cod_controlador,
+                        [bodyKey]: newValue, // Usa el campo correspondiente al sensor
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    await fetchControllerInfo(); // Llama al método para actualizar los datos
+                    console.log('Datos actualizados');
+                } else {
+                    console.error('Error en la respuesta:', data.message);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            } finally {
+                setLoading(false); // Finaliza el estado de carga
+            }
         }
     };
 
@@ -112,29 +148,56 @@ const MonitorearControladores = () => {
         }
     };
 
-    const getImageStyle = (value) => ({
-        tintColor: value ? 'green' : 'red',
-        transform: [{ scale: 1.4 }], // Aumenta el tamaño en un 10%
-    });
+    const getImageStyle = (key, value) => {
+
+        if (dataAutomatica.conection_controller === false) {
+            const isSpecialKey = ['conection_controller'].includes(key);
+            return {
+                tintColor: value
+                    ? (isSpecialKey ? 'white' : 'white')
+                    : (isSpecialKey ? 'red' : 'white'),
+                transform: [{ scale: 1.8 }], // Aumenta el tamaño en un 40%
+            };
+        } else {
+            const isSpecialKey = ['conection_controller', 'stable_humidity', 'stable_temperature'].includes(key);
+            return {
+                tintColor: value
+                    ? (isSpecialKey ? 'green' : 'orange')
+                    : (isSpecialKey ? 'red' : 'white'),
+                transform: [{ scale: 1.8 }], // Aumenta el tamaño en un 40%
+            };
+        }
+
+
+    };
+
 
 
     const getImageSource2 = (key) => {
-        if (key.toLowerCase().includes('manual_humedifier')) {
+        if (key.toLowerCase().includes('humedifier_activated') || key.toLowerCase().includes('humedifier_desactivated')) {
             return humidificador;
         }
-        if (key.toLowerCase().includes('manual_valve')) {
+        if (key.toLowerCase().includes('valve_activated') || key.toLowerCase().includes('valve_desactivated')) {
             return valvula;
         }
-        if (key.toLowerCase().includes('manual_ventilation')) {
+        if (key.toLowerCase().includes('ventilation_activated') || key.toLowerCase().includes('ventilation_desactivated')) {
             return ventilacion;
         }
-        if (key.toLowerCase().includes('manual_heating')) {
+        if (key.toLowerCase().includes('heating_activated') || key.toLowerCase().includes('heating_desactivated')) {
             return calefaccion;
+        }
+        if (key.toLowerCase().includes('conection_controller')) {
+            return enchufe;
+        }
+        if (key.toLowerCase().includes('stable_humidity')) {
+            return humedad;
+        }
+        if (key.toLowerCase().includes('stable_temperature')) {
+            return temperatura;
         }
     };
 
     const getNombre = (key) => {
-
         if (key.includes('manual_heating')) {
             return 'Calefacción'
         }
@@ -149,6 +212,30 @@ const MonitorearControladores = () => {
         }
     }
 
+    const getNombre2 = (key) => {
+
+        if (key.includes('heating_activated') || key.includes('heating_desactivated')) {
+            return 'Calefacción'
+        }
+        if (key.includes('humedifier_activated') || key.includes('humedifier_desactivated')) {
+            return 'Humidificador'
+        }
+        if (key.includes('ventilation_activated') || key.includes('ventilation_desactivated')) {
+            return 'Ventilación'
+        }
+        if (key.includes('valve_activated') || key.includes('valve_desactivated')) {
+            return 'Válvula de agua'
+        }
+        if (key.includes('conection_controller')) {
+            return 'Conexión del controlador'
+        }
+        if (key.includes('stable_humidity')) {
+            return 'Humedad'
+        }
+        if (key.includes('stable_temperature')) {
+            return 'Temperatura'
+        } else { return '' }
+    }
     return (
         <ImageBackground
             backgroundColor='#EDFDF2'
@@ -202,6 +289,7 @@ const MonitorearControladores = () => {
 
                 <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
                     <Text style={styles.sectionTitle}>Control Manual</Text>
+                    {loading && <ActivityIndicator size="large" color="black" />}
                     <View style={styles.cardsContainer}>
                         {data &&
                             Object.entries(data)
@@ -242,11 +330,11 @@ const MonitorearControladores = () => {
                     </View>
                 </View>
 
-                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, height: 230 }}>
+                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, height: 360 }}>
                     <Text style={styles.sectionTitle}>Controladores Automáticos</Text>
                     <View style={styles.cardsContainer2}>
-                        {data &&
-                            Object.entries(data)
+                        {dataAutomatica &&
+                            Object.entries(dataAutomatica)
                                 .filter(([, value]) => typeof value === 'boolean')
                                 .map(([key, value]) => (
                                     <Pressable
@@ -260,17 +348,17 @@ const MonitorearControladores = () => {
                                         ]}
                                         onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
                                         onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar
-                                        onPress={() => handleChangeState(key, !value)}
+                                    // onPress={() => handleChangeState(key, !value)}
                                     >
                                         <View style={styles.imageContainerEstados2}>
                                             <Image
                                                 source={getImageSource2(key)}
-                                                style={[styles.statusImage2, getImageStyle(value)]} // Agrega el estilo dinámico
+                                                style={[styles.statusImage2, getImageStyle(key, value)]} // Agrega el estilo dinámico
                                             />
                                         </View>
 
                                         {pressedKey === key && (
-                                            <Text style={styles.pressedText}>{getNombre(key)}</Text> // Mostrar texto
+                                            <Text style={styles.pressedText}>{getNombre2(key)}</Text> // Mostrar texto
                                         )}
                                     </Pressable>
 

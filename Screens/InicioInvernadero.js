@@ -133,7 +133,7 @@ const BoxItem = ({ item, }) => {
                                         numberOfLines={20} // Número de líneas visibles por defecto
                                         style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, }}
                                     />
-                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Invernadero:</Text>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Cultivo:</Text>
                                     {editedData.feature.map((item, index) => (
                                         <TextInput
                                             style={{ borderColor: 'black', borderWidth: 1 }}
@@ -170,7 +170,7 @@ const BoxItem = ({ item, }) => {
                                 <View style={{ margin: 20 }}>
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Descripción:</Text>
                                     <Text style={{ fontSize: 16, marginBottom: 20 }}>{item.description}</Text>
-                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Tipo de Invernadero:</Text>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Tipo de Cultivo:</Text>
                                     {item.feature.map((item, index) => (
                                         <Text style={{ fontSize: 16 }} key={index}>* {item}</Text>
                                     ))}
