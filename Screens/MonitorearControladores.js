@@ -70,16 +70,16 @@ const MonitorearControladores = () => {
         fetchControllerInfo();
     }, []);
 
-    useEffect(() => {
-        fetchControllerInfo(); // Llamada inicial
+    // useEffect(() => {
+    //     fetchControllerInfo(); // Llamada inicial
 
-        const interval = setInterval(() => {
-            fetchControllerInfo(); // Llamada cada 10 segundos
-        }, 10000);
+    //     const interval = setInterval(() => {
+    //         fetchControllerInfo(); // Llamada cada 10 segundos
+    //     }, 10000);
 
-        // Limpieza del intervalo
-        return () => clearInterval(interval);
-    }, []);
+    //     // Limpieza del intervalo
+    //     return () => clearInterval(interval);
+    // }, []);
 
     const handleChangeState = async (sensorType, newValue) => {
         if (dataAutomatica.conection_controller) {
