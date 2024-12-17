@@ -316,14 +316,15 @@ const InicioInvernadero = ({ dataCliente }) => {
             const data = await response.json();
 
             if (response.ok) {
-                const updatedData = data.map(item => {
+                const updatedData = data.map((item, index) => {
                     const image = cropImages[item.cod_crop];
                     return {
                         ...item,
+                        id: index + 1, // Asignar un ID único basado en el índice (comienza en 1)
                         image: image || null // Si no hay imagen asociada, se agrega null
                     };
                 });
-                
+
                 fetchGetDetails(updatedData);
             } else {
                 console.error('Error en la respuesta:', data.message);

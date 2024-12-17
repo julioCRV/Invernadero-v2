@@ -22,19 +22,19 @@ const Stack = createStackNavigator();
 
 // Stack Navigator para Monitorear y Dashboard
 const MainStack = ({ route }) => {
-  const { dataCliente } = route.params; // Aquí accedes a dataCliente a través de params
+  const { dataCliente } = route.params; // Acceder a dataCliente desde route.params
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen 
-        name="InicioInvernadero" 
-        component={(props) => <InicioInvernadero {...props} dataCliente={dataCliente} />}  // Pasamos dataCliente como prop
-      />
+      <Stack.Screen name="InicioInvernadero">
+        {(props) => <InicioInvernadero {...props} dataCliente={dataCliente} />}
+      </Stack.Screen>
       <Stack.Screen name="Monitorear" component={MonitorearControladores} />
       <Stack.Screen name="Dashboard" component={Dashboard} />
     </Stack.Navigator>
   );
 };
+
 
 
 const MyTabs = ({ handleLogout, dataCliente }) => {
@@ -82,19 +82,20 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
       />
       <Tab.Screen
         name="Cerrar Sesión"
-        component={() => null} // No muestra un componente
         options={{
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="user-circle-o" color={color} size={size} />
           ),
           tabBarButton: (props) => (
-            <TouchableOpacity
-              {...props}
-              onPress={handleLogout} // Cierra la sesión
-            />
+            <TouchableOpacity {...props} onPress={handleLogout}>
+              <FontAwesome name="user-circle-o" size={20} color={props.color} />
+            </TouchableOpacity>
           ),
         }}
-      />
+      >
+        {() => null}
+      </Tab.Screen>
+
     </Tab.Navigator>
   );
 };
@@ -151,7 +152,7 @@ export default function App() {
         {/* Navegación principal */}
         {isAuthenticated && (
           <Stack.Screen name="Main">
-            {(props) => <MyTabs {...props} handleLogout={handleLogout} dataCliente={dataCliente}/>}
+            {(props) => <MyTabs {...props} handleLogout={handleLogout} dataCliente={dataCliente} />}
           </Stack.Screen>
         )}
       </Stack.Navigator>

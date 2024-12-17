@@ -246,7 +246,7 @@ const MonitorearControladores = () => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}>
 
-                <Text style={styles.title}>{item.tipe}</Text>
+                <Text style={styles.title}>{item.details.controller_title}</Text>
                 <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
                     <Text style={styles.sectionTitle}>Sensores</Text>
                     <View style={styles.cardsContainer1}>
@@ -314,14 +314,14 @@ const MonitorearControladores = () => {
                                                 <Text style={styles.labelEstados}>{getNombre(key)}</Text>
                                                 {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
                                             </View>
-                                    
+
                                             <View style={styles.columnRight}>
                                                 <Switch
                                                     value={value}
                                                     onValueChange={() => handleChangeState(key, !value)}
                                                     thumbColor="white"
                                                     trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
-                                                    disabled={!dataAutomatica.conection_controller}  
+                                                    disabled={!dataAutomatica.conection_controller}
                                                     style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch}  // Aplica estilo adicional cuando está deshabilitado
                                                 />
                                             </View>
@@ -332,7 +332,7 @@ const MonitorearControladores = () => {
                     </View>
                 </View>
 
-                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, height: 360 }}>
+                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
                     <Text style={styles.sectionTitle}>Controladores Automáticos</Text>
                     <View style={styles.cardsContainer2}>
                         {dataAutomatica &&
@@ -383,11 +383,11 @@ const styles = StyleSheet.create({
     disabledSwitchOn: {
         color: 'red',
         opacity: 1, // Reducir opacidad para indicar que está deshabilitado
-      },
+    },
     disabledSwitch: {
         color: 'red',
         opacity: 0.3, // Reducir opacidad para indicar que está deshabilitado
-      },
+    },
     title: {
         fontSize: 26,
         fontWeight: 'bold',
@@ -413,9 +413,10 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
         justifyContent: 'space-between', // Espacio uniforme entre elementos
         padding: 10,
+        borderWidth: 1
     },
     card2: {
-        width: '30%', // Tres elementos por fila
+        width: 160, // Tres elementos por fila
         aspectRatio: 1, // Mantiene el elemento cuadrado
         marginBottom: 10, // Espaciado entre filas
         justifyContent: 'center',

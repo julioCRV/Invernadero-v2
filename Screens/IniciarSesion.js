@@ -21,8 +21,8 @@ const IniciarSesion = ({ onLogin }) => {
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: username, password: password }),
-                // body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
+                // body: JSON.stringify({ user_name: username, password: password }),
+                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
             });
 
             const data = await res.json();

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, FlatList, ScrollView, ImageBackground, Image } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion } from "../assets/estadosDashboard/estadoDashboard";
 
 const Dashboard = () => {
-
+  const scrollViewRef = useRef(null); // Creamos un ref para el ScrollView
   const route = useRoute();
   const { item } = route.params;
   // Simulamos los datos de temperatura y humedad de una semana (7 días)
@@ -21,6 +21,22 @@ const Dashboard = () => {
     { temperature: 30, humidity: 20, receivedAt: "20:41:34" },
     { temperature: 28, humidity: 22, receivedAt: "20:42:34" },
     { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
+    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
+    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
+    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
+    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
+    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
+    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
+    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
+    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
+    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
+    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
+    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
+    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
+    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
+    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
+    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
+    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
     { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
     { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
     { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
@@ -47,7 +63,11 @@ const Dashboard = () => {
           const dateB = new Date(`${b.date}T${b.hour}`);
           return dateB - dateA; // Ordena de más reciente a menos reciente
         });
-        setDataTabla(sortedData);
+        const dataWithKeys = sortedData.map((item, index) => ({
+          ...item,
+          id: index + 1 // Agrega un identificador basado en el índice (comenzando desde 1)
+        }));
+        setDataTabla(dataWithKeys);
       } else {
         console.error('Error en la respuesta:', data.message);
       }
@@ -55,7 +75,6 @@ const Dashboard = () => {
       console.error('Error en la solicitud:', error);
     }
   };
-
 
   const fetchDataGrafico = async () => {
     try {
@@ -84,6 +103,7 @@ const Dashboard = () => {
           data.humidity !== dataGrafica.humidity // Cambios en humedad
         ) {
           // Actualiza el estado de la última respuesta
+          console.log(dataWithTime);
           setDataGrafica(dataWithTime);
 
           // Agrega los datos con hora al historial
@@ -139,7 +159,7 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [dataGrafica]);
 
-  // Procesa los datos históricos para el gráfico
+  // Procesa los datos históricos para el gráfico 
   const processedData = historicalData.map((entry) => entry.temperature); // Extrae las temperaturas
   const processedDataH = historicalData.map((entry) => entry.humidity); // Extrae las temperaturas
   const labels = historicalData.map((entry) => entry.receivedAt); // Extrae las horas
@@ -168,15 +188,14 @@ const Dashboard = () => {
                   style={{ width: 20, height: 20, marginLeft: 5 }}
                 />
                 <Text style={styles.subtitle}>Temperatura</Text>
-                {selectedValue !== null && (
-                  <Text style={{ marginTop: 50 }}>
-                    Valor seleccionado: {selectedValue}°C
-                  </Text>
-                )}
-
               </View>
+              {selectedValue !== null && (
+                <Text style={{ textAlign: 'center', paddingTop: 10 }}>
+                  Valor de temperatura seleccionado: {selectedValue}°C
+                </Text>
+              )}
               {historicalData.length > 0 ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} ref={scrollViewRef}>
                   <LineChart
                     data={{
                       labels: labels.length > 0 ? labels : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
@@ -208,7 +227,6 @@ const Dashboard = () => {
                       setSelectedValue(value);
                     }}
                   />
-
                 </ScrollView>
 
               ) : (
@@ -224,13 +242,12 @@ const Dashboard = () => {
                   style={{ width: 15, height: 18, marginLeft: 5 }}
                 />
                 <Text style={styles.subtitle}> Humedad</Text>
-                {selectedValue2 !== null && (
-                  <Text style={{ marginTop: 50 }}>
-                    Valor seleccionado: {selectedValue2} %
-                  </Text>
-                )}
-
               </View>
+              {selectedValue2 !== null && (
+                <Text style={{ paddingTop: 10, textAlign: 'center' }}>
+                  Valor de humedad seleccionado: {selectedValue2} %
+                </Text>
+              )}
               {historicalData.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <LineChart
