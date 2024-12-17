@@ -21,17 +21,23 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 // Stack Navigator para Monitorear y Dashboard
-const MainStack = () => {
+const MainStack = ({ route }) => {
+  const { dataCliente } = route.params; // Aquí accedes a dataCliente a través de params
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Inicio" component={InicioInvernadero} />
+      <Stack.Screen 
+        name="InicioInvernadero" 
+        component={(props) => <InicioInvernadero {...props} dataCliente={dataCliente} />}  // Pasamos dataCliente como prop
+      />
       <Stack.Screen name="Monitorear" component={MonitorearControladores} />
       <Stack.Screen name="Dashboard" component={Dashboard} />
     </Stack.Navigator>
   );
 };
 
-const MyTabs = ({ handleLogout }) => {
+
+const MyTabs = ({ handleLogout, dataCliente }) => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -50,6 +56,7 @@ const MyTabs = ({ handleLogout }) => {
       <Tab.Screen
         name="Invernaderos"
         component={MainStack}
+        initialParams={{ dataCliente }} // Pasamos dataCliente a MainStack
         options={{
           tabBarIcon: ({ focused }) => (
             <Image
@@ -116,8 +123,13 @@ const VistaInicio = ({ onFinish }) => {
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [dataCliente, setDataCliente] = useState([]);
 
-  const handleLogin = () => setIsAuthenticated(true);
+  const handleLogin = (data) => {
+    setIsAuthenticated(true);
+    setDataCliente(data);
+  }
+
   const handleLogout = () => setIsAuthenticated(false);
   const handleIntroFinish = () => setShowIntro(false);
 
@@ -138,13 +150,12 @@ export default function App() {
         )}
         {/* Navegación principal */}
         {isAuthenticated && (
-          <>
-            <Stack.Screen name="Main">
-              {(props) => <MyTabs {...props} handleLogout={handleLogout} />}
-            </Stack.Screen>
-          </>
+          <Stack.Screen name="Main">
+            {(props) => <MyTabs {...props} handleLogout={handleLogout} dataCliente={dataCliente}/>}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 }

@@ -26,6 +26,8 @@ const Dashboard = () => {
     { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
     { temperature: 30, humidity: 20, receivedAt: "20:47:34" }
   ];
+  const [selectedValue, setSelectedValue] = useState(null);
+  const [selectedValue2, setSelectedValue2] = useState(null);
 
   const fetchControllerInfo = async () => {
     try {
@@ -33,7 +35,7 @@ const Dashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          controller_code: item.cod_controlador
+          controller_code: item.cod_controller
         })
       });
 
@@ -61,7 +63,7 @@ const Dashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          controller_code: item.cod_controlador,
+          controller_code: item.cod_controller,
         }),
       });
 
@@ -133,12 +135,13 @@ const Dashboard = () => {
 
   // Se ejecuta cada 5 segundos para actualizar el gráfico
   useEffect(() => {
-    const interval = setInterval(fetchDataGrafico, 5000);
+    const interval = setInterval(fetchDataGrafico, 4000);
     return () => clearInterval(interval);
   }, [dataGrafica]);
 
   // Procesa los datos históricos para el gráfico
   const processedData = historicalData.map((entry) => entry.temperature); // Extrae las temperaturas
+  const processedDataH = historicalData.map((entry) => entry.humidity); // Extrae las temperaturas
   const labels = historicalData.map((entry) => entry.receivedAt); // Extrae las horas
 
   return (
@@ -165,6 +168,12 @@ const Dashboard = () => {
                   style={{ width: 20, height: 20, marginLeft: 5 }}
                 />
                 <Text style={styles.subtitle}>Temperatura</Text>
+                {selectedValue !== null && (
+                  <Text style={{ marginTop: 50 }}>
+                    Valor seleccionado: {selectedValue}°C
+                  </Text>
+                )}
+
               </View>
               {historicalData.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -190,11 +199,16 @@ const Dashboard = () => {
                       color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                       style: { borderRadius: 16 },
-                      propsForDots: { r: '4', strokeWidth: '2', stroke: 'dark' },
+                      propsForDots: { r: '4', strokeWidth: '2', stroke: '#1e90ff' },
                     }}
                     bezier
                     style={{ marginVertical: 20, borderRadius: 16 }}
+                    onDataPointClick={(data) => {
+                      const { value } = data;
+                      setSelectedValue(value);
+                    }}
                   />
+
                 </ScrollView>
 
               ) : (
@@ -210,6 +224,12 @@ const Dashboard = () => {
                   style={{ width: 15, height: 18, marginLeft: 5 }}
                 />
                 <Text style={styles.subtitle}> Humedad</Text>
+                {selectedValue2 !== null && (
+                  <Text style={{ marginTop: 50 }}>
+                    Valor seleccionado: {selectedValue2} %
+                  </Text>
+                )}
+
               </View>
               {historicalData.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -218,7 +238,7 @@ const Dashboard = () => {
                       labels: labels.length > 0 ? labels : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
                       datasets: [
                         {
-                          data: processedData,
+                          data: processedDataH,
                           color: () => '#749FE2', strokeWidth: 2
                         }],
 
@@ -238,6 +258,10 @@ const Dashboard = () => {
                     }}
                     bezier
                     style={{ marginVertical: 20, borderRadius: 16 }}
+                    onDataPointClick={(data) => {
+                      const { value } = data;
+                      setSelectedValue2(value);
+                    }}
                   />
                 </ScrollView>
               ) : (

@@ -19,7 +19,7 @@ const MonitorearControladores = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    controller_code: item.cod_controlador
+                    controller_code: item.cod_controller
                 })
             });
 
@@ -74,7 +74,7 @@ const MonitorearControladores = () => {
         fetchControllerInfo(); // Llamada inicial
 
         const interval = setInterval(() => {
-            fetchControllerInfo(); // Llamada cada 2 segundos
+            fetchControllerInfo(); // Llamada cada 10 segundos
         }, 10000);
 
         // Limpieza del intervalo
@@ -109,10 +109,10 @@ const MonitorearControladores = () => {
 
             try {
                 const response = await fetch(url, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        controller_code: item.cod_controlador,
+                        controller_code: item.cod_controller,
                         [bodyKey]: newValue, // Usa el campo correspondiente al sensor
                     }),
                 });
@@ -314,13 +314,15 @@ const MonitorearControladores = () => {
                                                 <Text style={styles.labelEstados}>{getNombre(key)}</Text>
                                                 {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
                                             </View>
-
+                                    
                                             <View style={styles.columnRight}>
                                                 <Switch
                                                     value={value}
                                                     onValueChange={() => handleChangeState(key, !value)}
                                                     thumbColor="white"
                                                     trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
+                                                    disabled={!dataAutomatica.conection_controller}  
+                                                    style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch}  // Aplica estilo adicional cuando está deshabilitado
                                                 />
                                             </View>
                                         </View>
@@ -378,6 +380,14 @@ const styles = StyleSheet.create({
         paddingTop: '7%',
         height: '120%'
     },
+    disabledSwitchOn: {
+        color: 'red',
+        opacity: 1, // Reducir opacidad para indicar que está deshabilitado
+      },
+    disabledSwitch: {
+        color: 'red',
+        opacity: 0.3, // Reducir opacidad para indicar que está deshabilitado
+      },
     title: {
         fontSize: 26,
         fontWeight: 'bold',

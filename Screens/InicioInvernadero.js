@@ -10,52 +10,81 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import IconPlanta from '../assets/iconPlanta.png';
+import { useRoute } from '@react-navigation/native';
 
-const data = [
-    {
-        id: '1',
-        cod_controlador: "9173690",
-        image: require('../assets/zanahoria.png'),
-        tipe: 'Cultivo de Zanahorias',
-        description: 'Este invernadero está especialmente diseñado para el cultivo de zanahorias, proporcionando un suelo suelto y bien drenado. Las condiciones controladas permiten un crecimiento uniforme y saludable durante todo el año.',
-        feature: ['Control de Humedad', 'Riego por Goteo'],
-    },
-    {
-        id: '2',
-        cod_controlador: "249978",
-        image: require('../assets/zanahoria.png'),
-        tipe: 'Invernadero de Zanahorias Orgánicas',
-        description: 'Este invernadero está optimizado para el cultivo de zanahorias orgánicas. Utiliza un sistema de control automático de riego y monitoreo de nutrientes para asegurar el crecimiento saludable de zanahorias sin el uso de pesticidas. Ideal para la producción de alimentos ecológicos de alta calidad.',
-        feature: ['Riego por Goteo Automatizado', 'Control de temperatura', 'Producción Ecológica'],
-
-    },
-    // {
-    //     id: '3',
-    //     image: require('../assets/tomate.png'), 
-    //     tipe: 'Cultivo de Tomates',
-    //     description: 'Este invernadero está diseñado específicamente para el cultivo de tomates, con un control preciso de la temperatura y los niveles de CO2 para maximizar la producción de frutas saludables y sabrosas.',
-    //     feature: ['Control de Temperatura', 'Riego Automatizado', 'Soporte para Trepado'],
-    // },
-    // {
-    //     id: '4',
-    //     image: require('../assets/fresa.png'), 
-    //     tipe: 'Cultivo de Frutillas',
-    //     description: 'Diseñado para el cultivo de frutillas, este invernadero mantiene las condiciones ideales de humedad y temperatura, permitiendo la producción de frutillas frescas y dulces durante todo el año.',
-    //     feature: ['Clima Controlado', 'Riego por Goteo', 'Monitoreo de Humedad'],
-    // }
-];
-
-
-const BoxItem = ({ item, }) => {
+const cropImages = {
+    1: require('../assets/zanahoria.png'),
+    2: require('../assets/lechuga.png'),
+    3: require('../assets/tomate.png'),
+    4: require('../assets/frutilla.png'),
+};
+const BoxItem = ({ item, onReload }) => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const [editedData, setEditedData] = useState({
-        tipe: item.tipe,
-        description: item.description,
-        feature: item.feature,
+        tipe: item.details.controller_title,
+        description: item.details.controller_description,
+        feature: item.details.crop_name,
+        cod: item.details.controller_title,
     });
+
+    // console.log(editedData);
+    const [crops, setCrops] = useState([]);
+
+    const [selectedCrop, setSelectedCrop] = useState(null);
+    const [titulo, setTitulo] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [tipo, setTipo] = useState('');
+
+    // // Efecto para inicializar las variables con editedData cuando el componente se monta
+    // useEffect(() => {
+    //     if (editedData) {
+    //         setTitulo(editedData.tipe || '');
+    //         setDescripcion(editedData.description || '');
+    //         setTipo(editedData.feature || '');
+    //         setSelectedCrop(crops.find(crop => crop.crop_code === editedData.cod) || '');
+    //     }
+    //     // console.log("Valores inicializados:", { titulo, descripcion, tipo });
+    // }, [goEditar]);
+
+    useEffect(() => {
+        setEditedData({
+            tipe: item.details?.controller_title || "",
+            description: item.details?.controller_description || "",
+            feature: item.details?.crop_name || "",
+            cod: item.details?.controller_title || "",
+        });
+    }, [item.details]);
+
+    const fetchCrops = async () => {
+        try {
+            const response = await fetch('https://gmb-tci.onrender.com/crop/get_crops', {
+                method: 'GET', // Cambiar a 'POST' si la API lo requiere
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error en la solicitud: ${response.statusText}`);
+            }
+
+            const data = await response.json(); // Suponiendo que la API devuelve JSON
+            const defaultCrop = data.find(crop => crop.crop_code === item.cod_crop);
+            if (defaultCrop) {
+                setSelectedCrop(defaultCrop);
+            }
+            setCrops(data); // Guarda los datos obtenidos en el estado `crops`
+        } catch (error) {
+            console.error('Error al obtener los cultivos:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCrops();
+    }, []);
 
     const goDetalles = () => {
         //Click en Detalles
@@ -73,24 +102,70 @@ const BoxItem = ({ item, }) => {
         navigation.navigate('Dashboard', { item });
     }
     const goEditar = () => {
-        //Click en Editar
+        setTitulo(item.details.controller_title);
+        setDescripcion(item.details.controller_description);
+        setTipo(editedData.feature || '');
+        // setSelectedCrop(it);
+
         setModalVisible(true);
         setIsEditing(true);
         setIsVisible(false);
     }
 
-    const handleSave = () => {
-        item.tipe = editedData.tipe;
-        item.description = editedData.description;
-        item.feature = editedData.feature;
+    // Función para actualizar el estado 'editedData' cuando se recargan los datos
+    const updateData = (newItem) => {
+        setEditedData({
+            tipe: newItem.tipe,
+            description: newItem.description,
+            feature: newItem.feature,
+            cod: newItem.cod,
+        });
+    };
+
+    // Usamos el efecto para actualizar 'editedData' cuando 'item' cambia
+    useEffect(() => {
+        updateData(item);
+    }, [item]); // Esto actualizará 'editedData' cada vez que 'item' cambie
+
+    const handleSave = async () => {
+        const controllerData = {
+            controller_code: item.cod_controller,
+            title: titulo,
+            description: descripcion,
+            cod_crop: selectedCrop.crop_code,
+        };
+
+        try {
+            const response = await fetch('https://gmb-tci.onrender.com/controller/update_controller_detail', {
+                method: 'PUT', // Método HTTP correcto para actualizar
+                headers: {
+                    'Content-Type': 'application/json', // Encabezado para JSON
+                },
+                body: JSON.stringify(controllerData), // Convertir datos a JSON
+            });
+
+            const result = await response.json(); // Parsear la respuesta como JSON
+
+            if (response.ok) {
+                console.log('Actualización exitosa:', result);
+                onReload();
+            } else {
+                console.error('Error en la actualización:', result.message);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
         setModalVisible(false);
     };
 
-    const handleInputChange = (name, value) => {
-        setEditedData({
-            ...editedData,
-            [name]: value,
-        });
+    // Handlers para cambiar los valores
+    const handleTituloChange = (value) => setTitulo(value);
+    const handleDescripcionChange = (value) => setDescripcion(value);
+    const handleTipoChange = (value) => setTipo(value);
+
+
+    const handleSelect = (crop) => {
+        setSelectedCrop(crop);
     };
 
     return (
@@ -122,32 +197,40 @@ const BoxItem = ({ item, }) => {
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', paddingTop: 30, color: '#12682F' }}>Titulo:</Text>
                                     <TextInput
                                         style={style.modalText}
-                                        value={editedData.tipe}
-                                        onChangeText={(value) => handleInputChange('tipe', value)}
+                                        value={titulo}
+                                        onChangeText={handleTituloChange}
                                     />
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Descripción:</Text>
                                     <TextInput
-                                        value={editedData.description}
-                                        onChangeText={(value) => handleInputChange('description', value)}
+                                        value={descripcion}
+                                        onChangeText={handleDescripcionChange}
                                         multiline={true} // Permite múltiples líneas
                                         numberOfLines={20} // Número de líneas visibles por defecto
                                         style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, }}
                                     />
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Cultivo:</Text>
-                                    {editedData.feature.map((item, index) => (
-                                        <TextInput
-                                            style={{ borderColor: 'black', borderWidth: 1 }}
-                                            key={index}
-                                            value={item}
-                                            onChangeText={(value) => {
-                                                const newFeatures = [...editedData.feature];
-                                                newFeatures[index] = value;
-                                                setEditedData({ ...editedData, feature: newFeatures });
-                                            }}
-                                            multiline={true} // Permite múltiples líneas
-                                            numberOfLines={1} // Número de líneas visibles por defecto
-                                        />
-                                    ))}
+                                    <FlatList
+                                        data={crops}
+                                        keyExtractor={(item) => item.crop_code}
+                                        renderItem={({ item }) => (
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.itemA,
+                                                    selectedCrop?.crop_code === item.crop_code && styles.selectedItemA
+                                                ]}
+                                                onPress={() => handleSelect(item)}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        styles.itemTextA,
+                                                        selectedCrop?.crop_code === item.crop_code && styles.selectedTextA
+                                                    ]}
+                                                >
+                                                    {item.crop_name}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    />
                                     <View style={style.buttonsContainer}>
                                         <Pressable style={style.button2} onPress={() => setModalVisible(false)} >
                                             <Text style={style.textButton}>Cancelar</Text>
@@ -166,14 +249,13 @@ const BoxItem = ({ item, }) => {
                                     <Foundation name="page-edit" size={24} color="black" />
                                     <Text style={{ fontSize: 15 }}>Editar</Text>
                                 </Pressable>
-                                <Text style={style.modalTextVer} numberOfLines={2}>{item.tipe}</Text>
+
+                                <Text style={style.modalTextVer} numberOfLines={2}>{item.details.controller_title}</Text>
                                 <View style={{ margin: 20 }}>
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Descripción:</Text>
-                                    <Text style={{ fontSize: 16, marginBottom: 20 }}>{item.description}</Text>
+                                    <Text style={{ fontSize: 16, marginBottom: 20 }}>{item.details.controller_description}</Text>
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', fontSize: 16, color: '#12682F' }}>Tipo de Cultivo:</Text>
-                                    {item.feature.map((item, index) => (
-                                        <Text style={{ fontSize: 16 }} key={index}>* {item}</Text>
-                                    ))}
+                                    <Text style={{ fontSize: 16 }}>* {item.details.crop_name}</Text>
                                 </View>
                             </>
                         )}
@@ -185,9 +267,9 @@ const BoxItem = ({ item, }) => {
 
             <Image
                 source={item.image} // Ruta relativa a la imagen local
-                style={{ width: 200, height: 100 }} // Ajusta el tamaño de la imagen
+                style={{ width: 320, height: 100, borderRadius: 15 }} // Ajusta el tamaño de la imagen
             />
-            <Text style={styles.title2}>{item.tipe}</Text>
+            <Text style={styles.title2}>{item.details.controller_title}</Text>
 
             <StatusBar backgroundColor={color.font} />
             {/* <Text style={styles.text}>{item.description}</Text> */}
@@ -215,26 +297,97 @@ const BoxItem = ({ item, }) => {
 };
 
 
-export default function GreenManagerTc(props) {
-    const navigation = useNavigation();
-    const back = () => {
-        {/**FUNCION PARA SALIR CON EL BOTON SUPERIOR DERECHO */ }
-    }
+const InicioInvernadero = ({ dataCliente }) => {
+    const [data, setData] = useState(null);
+    const [reload, setReload] = useState(false); // Estado de recarga
+    // const { userData } = props.route.params;
+    // console.log( route, "hhhhhhhhhhh"); 
+
+    const fetchGetInvernaderos = async () => {
+        try {
+            const response = await fetch('https://gmb-tci.onrender.com/controller/get_drivers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_code: dataCliente.user_code
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const updatedData = data.map(item => {
+                    const image = cropImages[item.cod_crop];
+                    return {
+                        ...item,
+                        image: image || null // Si no hay imagen asociada, se agrega null
+                    };
+                });
+                
+                fetchGetDetails(updatedData);
+            } else {
+                console.error('Error en la respuesta:', data.message);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
+    };
+
+    const fetchGetDetails = async (data) => {
+        // Iterar sobre cada controlador en data
+        for (let controller of data) {
+            try {
+                // Realizar la solicitud POST con fetch
+                const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_detail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ controller_code: controller.cod_controller })
+                });
+
+                // Verificar si la respuesta es exitosa
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.statusText}`);
+                }
+
+                // Convertir la respuesta en JSON
+                const controllerDetails = await response.json();
+
+                // Añadir los detalles obtenidos al objeto del controlador
+                controller.details = controllerDetails;
+            } catch (error) {
+                console.error(`Error al obtener los detalles para el controlador ${controller.controller_code}:`, error);
+            }
+        }
+
+        const cleanControllers = (controllers) => {
+            return controllers.filter(controller =>
+                controller.details && typeof controller.details === 'object' && !Array.isArray(controller.details)
+            );
+        };
+        setData(cleanControllers(data));
+    };
+
+    useEffect(() => {
+        fetchGetInvernaderos();
+    }, [reload]); // Dependencia de reload
+
+    const handleReload = () => {
+        setReload(prerv => !prerv); // Cambiar el valor de reload para recargar los datos
+    };
 
     return (
         <View style={styles.container}>
             <View style={styles.topBox}>
-                {/* <Ionicons name="arrow-back-circle-outline" size={35} color="black" onPress={() => navigation.navigate('IniciarSesion')} /> */}
                 <Text style={styles.topTitle}>Green Manager TC</Text>
-                {/* <Feather name="log-out" size={28} color="black" onPress={() => navigation.navigate('IniciarSesion')} /> */}
             </View>
             <View style={styles.bodybox}>
                 <Text style={styles.title}>Mis Invernaderos</Text>
                 <FlatList
                     data={data}
-                    renderItem={({ item }) => <BoxItem item={item} />}
+                    renderItem={({ item }) => <BoxItem item={item} onReload={handleReload} />}
                     keyExtractor={item => item.id}
-                // contentContainerStyle={style.container}
                 />
             </View>
         </View>
@@ -248,6 +401,26 @@ const color = {
 
 }
 const styles = StyleSheet.create({
+    itemA: {
+        padding: 5,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    selectedItemA: {
+        backgroundColor: '#D3F9D8', // Color de fondo para el ítem seleccionado
+    },
+    itemTextA: {
+        fontSize: 14,
+        color: 'black',
+    },
+    selectedTextA: {
+        color: 'green', // Color de texto para el ítem seleccionado
+        fontWeight: 'bold',
+    },
+
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -475,3 +648,5 @@ const style = StyleSheet.create({
         textAlign: 'center',
     }
 })
+
+export default InicioInvernadero;

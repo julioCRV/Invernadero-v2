@@ -2,37 +2,73 @@ import { View, Text, TextInput, StyleSheet, Pressable, StatusBar, Image } from '
 import Octicons from '@expo/vector-icons/Octicons';
 import Feather from '@expo/vector-icons/Feather';
 import React, { useState } from 'react';
+import LoadingModal from '../components/ModalLogin';
+import SuccessModal from '../components/ModalExito';
+import ErrorModal from '../components/ModalError';
 
-export default function LogIn({props, onLogin}) {
+const IniciarSesion = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [visible, setVisible] = useState(false);
-    const [text, setText] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+    const [isLoginError, setIsLoginError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const logueo = async () => {
-        console.log('Username:', username);
-        console.log('Password:', password);
         try {
+            setIsLoading(true); // Inicia el modal de carga
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // body: JSON.stringify({ user_name: username, password: password })
-                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" })
+                body: JSON.stringify({ user_name: username, password: password }),
+                // body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
             });
 
             const data = await res.json();
+
             if (res.ok) {
                 console.log('Login successful', data);
-                onLogin();
-                // props.navigation.navigate('Inicio Invernadero');
+                setTimeout(() => {
+                    setIsLoading(false); // Detener el modal de carga
+                }, 1000); // Mantener el modal visible por 2 segundos antes de cerrar
+                // Simulando un login exitoso
+                setIsLoginSuccess(true);
+
+                // Cerrar el modal después de 3 segundos
+                setTimeout(() => {
+                    setIsLoginSuccess(false);  // Cerrar el modal
+                    onLogin(data);     // Llamar a la función onLogin (si la tienes)
+                }, 1000);
+
             } else {
                 console.error('Login failed', data.message);
+                setTimeout(() => {
+                    setIsLoading(false); // Detener el modal de carga
+                }, 2000); // Mostrar el mensaje de error por 2 segundos
+                setErrorMessage('Error: Usuario o contraseña incorrectos');
+                setIsLoginError(true);
+
+                // Cerrar el modal después de 3 segundos
+                setTimeout(() => {
+                    setIsLoginError(false);
+                }, 3000);
             }
         } catch (err) {
             console.error('Error:', err);
+            setLoginMessage('Error de conexión');
+            setTimeout(() => {
+                setIsLoading(false); // Detener el modal de carga
+            }, 2000); // Mostrar mensaje de error por 2 segundos
+            setErrorMessage('Error de conexión');
+            setIsLoginError(true);
+
+            // Cerrar el modal después de 3 segundos
+            setTimeout(() => {
+                setIsLoginError(false);
+            }, 3000);
         }
     };
-
 
     return (
         <View style={styles.container}>
@@ -80,7 +116,10 @@ export default function LogIn({props, onLogin}) {
                 </Pressable>
             </View>
 
-         
+            {/* Modal de carga */}
+            <LoadingModal isVisible={isLoading} message="Iniciando sesión..." />
+            <SuccessModal visible={isLoginSuccess} onClose={() => setIsLoginSuccess(false)} />
+            <ErrorModal visible={isLoginError} errorMessage={errorMessage} onClose={() => setIsLoginError(false)} />
         </View>
     )
 }
@@ -161,3 +200,5 @@ const styles = StyleSheet.create({
     }
 
 });
+
+export default IniciarSesion;
