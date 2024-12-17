@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Switch, Image, Modal, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Switch, Image, Dimensions, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
 import { FontAwesomeIcon } from '@expo/vector-icons/FontAwesome6';
@@ -236,6 +236,8 @@ const MonitorearControladores = () => {
             return 'Temperatura'
         } else { return '' }
     }
+
+
     return (
         <ImageBackground
             backgroundColor='#EDFDF2'
@@ -349,8 +351,7 @@ const MonitorearControladores = () => {
                                             },
                                         ]}
                                         onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
-                                        onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar
-                                    // onPress={() => handleChangeState(key, !value)}
+                                        onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar<
                                     >
                                         <View style={styles.imageContainerEstados2}>
                                             <Image
@@ -363,7 +364,6 @@ const MonitorearControladores = () => {
                                             <Text style={styles.pressedText}>{getNombre2(key)}</Text> // Mostrar texto
                                         )}
                                     </Pressable>
-
                                 ))}
                     </View>
                 </View>
@@ -372,6 +372,8 @@ const MonitorearControladores = () => {
         </ImageBackground>
     );
 }
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
@@ -412,11 +414,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row', // Los elementos se distribuyen en filas
         flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
         justifyContent: 'space-between', // Espacio uniforme entre elementos
-        padding: 10,
-        borderWidth: 1
-    },
-    card2: {
-        width: 160, // Tres elementos por fila
+        padding: width * 0.05, // Ajustamos el padding según el ancho de la pantalla
+        // borderWidth: 1,
+        height: width * 0.7,
+      },
+      card2: {
+        width: width > 400 ? '30%' : '30%', // Tres elementos por fila en pantallas grandes, dos en pantallas pequeñas
         aspectRatio: 1, // Mantiene el elemento cuadrado
         marginBottom: 10, // Espaciado entre filas
         justifyContent: 'center',
@@ -424,7 +427,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#ccc',
-    },
+      },
     imageContainerEstados2: {
         justifyContent: 'center',
         alignItems: 'center',
