@@ -24,7 +24,7 @@ const MonitorearControladores = () => {
                     controller_code: item.cod_controller
                 })
             });
-    
+
             // Verificar si la respuesta es exitosa
             const data = await response.json();
             if (response.ok) {
@@ -39,12 +39,12 @@ const MonitorearControladores = () => {
                         Temperatura: data.temperature,
                         Humedad: data.humidity,
                     };
-    
+
                     const translatedData2 = {
                         conection_controller: data.conection_controller,
                         stable_humidity: data.stable_humidity,
                         stable_temperature: data.stable_temperature,
-    
+
                         heating_activated: data.heating_activated,
                         heating_desactivated: data.heating_deactivated,
                         humedifier_activated: data.humedifier_activated,
@@ -54,7 +54,7 @@ const MonitorearControladores = () => {
                         ventilation_activated: data.ventilation_activated,
                         ventilation_desactivated: data.ventilation_deactivated,
                     };
-    
+
                     // Actualizar estado con los datos traducidos
                     setData(translatedData);
                     setDataAutomatica(translatedData2);
@@ -71,15 +71,26 @@ const MonitorearControladores = () => {
         } catch (error) {
             // Capturar y registrar cualquier error de la solicitud
             console.error('Error en la solicitud:', error);
-            alert(`Error al realizar la solicitud: ${error.message}. Por favor, intente nuevamente.`);
+            alert(`Error al realizar la solicitud: ${error.message, data}. Por favor, intente nuevamente.`);
             navigation.navigate('InicioInvernadero');
         }
     };
-    
+
 
     useEffect(() => {
-        fetchControllerInfo();
+        const fetchTwice = async () => {
+            try {
+                await fetchControllerInfo(); // Primera llamada
+                setTimeout(async () => {
+                    await fetchControllerInfo(); // Segunda llamada después de un retraso
+                }, 2000); // Retraso de 1 segundo (puedes ajustarlo)
+            } catch (error) {
+                console.error('Error en fetchTwice:', error);
+            }
+        };
+        fetchTwice();
     }, []);
+    
 
     // useEffect(() => {
     //     fetchControllerInfo(); // Llamada inicial
@@ -309,7 +320,7 @@ const MonitorearControladores = () => {
                     <View style={styles.cardsContainer}>
                         {data &&
                             Object.entries(data)
-                                .filter(([, value]) => typeof value === 'boolean')
+                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
                                 .map(([key, value]) => (
                                     <TouchableOpacity
                                         key={key}
@@ -353,7 +364,7 @@ const MonitorearControladores = () => {
                     <View style={styles.cardsContainer2}>
                         {dataAutomatica &&
                             Object.entries(dataAutomatica)
-                                .filter(([, value]) => typeof value === 'boolean')
+                            .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
                                 .map(([key, value]) => (
                                     <Pressable
                                         key={key}
@@ -431,8 +442,8 @@ const styles = StyleSheet.create({
         padding: width * 0.05, // Ajustamos el padding según el ancho de la pantalla
         // borderWidth: 1,
         height: width * 0.7,
-      },
-      card2: {
+    },
+    card2: {
         width: width > 400 ? '30%' : '30%', // Tres elementos por fila en pantallas grandes, dos en pantallas pequeñas
         aspectRatio: 1, // Mantiene el elemento cuadrado
         marginBottom: 10, // Espaciado entre filas
@@ -441,7 +452,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#ccc',
-      },
+    },
     imageContainerEstados2: {
         justifyContent: 'center',
         alignItems: 'center',

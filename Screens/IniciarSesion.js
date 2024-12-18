@@ -29,7 +29,6 @@ const IniciarSesion = ({ onLogin }) => {
 
             if (res.ok) {
                 console.log('Login successful', data);
-                alert(`Login successful${data.user_code}`);
                 // Aquí, en vez de usar setTimeout, gestionamos el cierre del modal sin demoras innecesarias
                 setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
                 setIsLoginSuccess(true); // Mostrar el modal de éxito
@@ -69,6 +68,17 @@ const IniciarSesion = ({ onLogin }) => {
         }
     };
 
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const submitLogin = async () => {
+        try {
+            await logueo(); // Primera llamada
+            await delay(1000); // Retraso de 1 segundo
+            await logueo(); // Segunda llamada
+        } catch (error) {
+            console.error("Error ejecutando logueo dos veces con retraso:", error);
+        }
+    };
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={color.primary} />
@@ -110,7 +120,7 @@ const IniciarSesion = ({ onLogin }) => {
                 </View>
 
 
-                <Pressable title="Login" onPress={logueo} style={styles.button}>
+                <Pressable title="Login" onPress={submitLogin} style={styles.button}>
                     <Text style={styles.buttonText}>Iniciar Sesión</Text>
                 </Pressable>
             </View>
