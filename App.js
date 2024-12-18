@@ -16,6 +16,13 @@ import Nosotros from './Screens/About';
 import IconPlanta from './assets/iconPlanta.png';
 
 
+
+import MonitorearControladores1 from './Screens/MonitorearControladores1';
+import MonitorearControladores2 from './Screens/MonitorearControladores2';
+import MonitorearControladores3 from './Screens/MonitorearControladores3';
+import MonitorearControladores4 from './Screens/MonitorearControladores4';
+
+
 // Crear el Tab Navigator
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -30,6 +37,14 @@ const MainStack = ({ route }) => {
         {(props) => <InicioInvernadero {...props} dataCliente={dataCliente} />}
       </Stack.Screen>
       <Stack.Screen name="Monitorear" component={MonitorearControladores} />
+
+
+      <Stack.Screen name="Monitorear1" component={MonitorearControladores1} />
+      <Stack.Screen name="Monitorear2" component={MonitorearControladores2} />
+      <Stack.Screen name="Monitorear3" component={MonitorearControladores3} />
+      <Stack.Screen name="Monitorear4" component={MonitorearControladores4} />
+
+
       <Stack.Screen name="Dashboard" component={Dashboard} />
     </Stack.Navigator>
   );

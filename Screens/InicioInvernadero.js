@@ -93,10 +93,26 @@ const BoxItem = ({ item, onReload }) => {
         setIsVisible(true);
     }
     const goMonitorear = () => {
-        //Click en Monitorear
-        // navigation.navigate('VerConfig', { name, imageUrl });
         navigation.navigate('Monitorear', { item });
     }
+
+    const goMonitorear1 = () => {
+        navigation.navigate('Monitorear1', { item });
+    }
+    const goMonitorear2 = () => {
+        navigation.navigate('Monitorear2', { item });
+    }
+    const goMonitorear3 = () => {
+        navigation.navigate('Monitorear3', { item });
+    }
+    const goMonitorear4 = () => {
+        navigation.navigate('Monitorear4', { item });
+    }
+
+
+
+
+
     const goDashboard = () => {
         //Click en Dashboard
         navigation.navigate('Dashboard', { item });
@@ -282,6 +298,38 @@ const BoxItem = ({ item, onReload }) => {
                     />
                     <Text>Monitorear</Text>
                 </Pressable>
+
+
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear1()}>
+                    <Image
+                        source={IconPlanta} // Usa la imagen
+                        style={{ width: 24, height: 24, }}
+                    />
+                    <Text>Monitorear1</Text>
+                </Pressable>
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear2()}>
+                    <Image
+                        source={IconPlanta} // Usa la imagen
+                        style={{ width: 24, height: 24, }}
+                    />
+                    <Text>Monitorear2</Text>
+                </Pressable>
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear3()}>
+                    <Image
+                        source={IconPlanta} // Usa la imagen
+                        style={{ width: 24, height: 24, }}
+                    />
+                    <Text>Monitorear3</Text>
+                </Pressable>
+                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear4()}>
+                    <Image
+                        source={IconPlanta} // Usa la imagen
+                        style={{ width: 24, height: 24, }}
+                    />
+                    <Text>Monitorear4</Text>
+                </Pressable>
+
+
                 <Pressable style={[styles.button, { backgroundColor: 'orange' }]} onPress={() => goDetalles()}>
                     <Ionicons name="newspaper-outline" size={24} color="black" />
                     <Text>Detalles</Text>
@@ -513,7 +561,7 @@ const styles = StyleSheet.create({
     },
     boxButtons: {
         width: '100%',
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
         marginTop: 10
     },

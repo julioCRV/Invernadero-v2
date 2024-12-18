@@ -10,86 +10,33 @@ const MonitorearControladores = () => {
     const route = useRoute();
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
-    const [data, setData] = useState(null);
-    const [dataAutomatica, setDataAutomatica] = useState(null);
+    // const [data, setData] = useState(null);
+    // const [dataAutomatica, setDataAutomatica] = useState(null);
+    const data = {
+        manual_heating: false,
+        manual_humedifier: false,
+        manual_valve: false,
+        manual_ventilation: false,
+        Temperatura: 0, // Suponiendo que la temperatura por defecto es 0
+        Humedad: 0, // Suponiendo que la humedad por defecto es 0
+    };
+
+    const dataAutomatica = {
+        conection_controller: false,
+        stable_humidity: false,
+        stable_temperature: false,
+        heating_activated: false,
+        heating_desactivated: false,
+        humedifier_activated: false,
+        humedifier_desactivated: false,
+        valve_activated: false,
+        valve_desactivated: false,
+        ventilation_activated: false,
+        ventilation_desactivated: false,
+    };
+
     const [loading, setLoading] = useState(false); // Estado de carga
 
-    const fetchControllerInfo = async () => {
-        try {
-            // Realizar la solicitud HTTP
-            const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    controller_code: item.cod_controller
-                })
-            });
-    
-            // Verificar si la respuesta es exitosa
-            const data = await response.json();
-            if (response.ok) {
-                // Verifica si los datos son un objeto
-                if (data && typeof data === 'object') {
-                    // Traducir claves de datos
-                    const translatedData = {
-                        manual_heating: data.manual_heating,
-                        manual_humedifier: data.manual_humedifier,
-                        manual_valve: data.manual_valve,
-                        manual_ventilation: data.manual_ventilation,
-                        Temperatura: data.temperature,
-                        Humedad: data.humidity,
-                    };
-    
-                    const translatedData2 = {
-                        conection_controller: data.conection_controller,
-                        stable_humidity: data.stable_humidity,
-                        stable_temperature: data.stable_temperature,
-    
-                        heating_activated: data.heating_activated,
-                        heating_desactivated: data.heating_deactivated,
-                        humedifier_activated: data.humedifier_activated,
-                        humedifier_desactivated: data.humedifier_deactivated,
-                        valve_activated: data.valve_activated,
-                        valve_desactivated: data.valve_deactivated,
-                        ventilation_activated: data.ventilation_activated,
-                        ventilation_desactivated: data.ventilation_deactivated,
-                    };
-    
-                    // Actualizar estado con los datos traducidos
-                    setData(translatedData);
-                    setDataAutomatica(translatedData2);
-                } else {
-                    // Si los datos no tienen el formato esperado
-                    console.error('Los datos recibidos no tienen el formato esperado:', data);
-                    alert('Error: Los datos no tienen el formato esperado.');
-                }
-            } else {
-                // Si la respuesta no es OK
-                console.error('Error en la respuesta:', data.message);
-                alert('Error en la respuesta del servidor.');
-            }
-        } catch (error) {
-            // Capturar y registrar cualquier error de la solicitud
-            console.error('Error en la solicitud:', error);
-            alert('Error al realizar la solicitud. Por favor, intente nuevamente.');
-        }
-    };
-    
-
-    useEffect(() => {
-        fetchControllerInfo();
-    }, []);
-
-    // useEffect(() => {
-    //     fetchControllerInfo(); // Llamada inicial
-
-    //     const interval = setInterval(() => {
-    //         fetchControllerInfo(); // Llamada cada 10 segundos
-    //     }, 10000);
-
-    //     // Limpieza del intervalo
-    //     return () => clearInterval(interval);
-    // }, []);
 
     const handleChangeState = async (sensorType, newValue) => {
         if (dataAutomatica.conection_controller) {
@@ -184,8 +131,6 @@ const MonitorearControladores = () => {
 
     };
 
-
-
     const getImageSource2 = (key) => {
         if (key.toLowerCase().includes('humedifier_activated') || key.toLowerCase().includes('humedifier_desactivated')) {
             return humidificador;
@@ -260,8 +205,8 @@ const MonitorearControladores = () => {
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}>
-
-                <Text style={styles.title}>{item.details.controller_title}</Text>
+                <Text>Monitor 1</Text>
+                <Text style={styles.title}>{item.details.controller_title} monitor 1</Text>
                 <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
                     <Text style={styles.sectionTitle}>Sensores</Text>
                     <View style={styles.cardsContainer1}>
@@ -304,11 +249,11 @@ const MonitorearControladores = () => {
 
                 <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
                     <Text style={styles.sectionTitle}>Control Manual</Text>
-                    {/* {loading && <ActivityIndicator size="large" color="black" />} */}
+                    {loading && <ActivityIndicator size="large" color="black" />}
                     <View style={styles.cardsContainer}>
                         {data &&
                             Object.entries(data)
-                                .filter(([, value]) => typeof value === 'boolean')
+                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
                                 .map(([key, value]) => (
                                     <TouchableOpacity
                                         key={key}
@@ -352,7 +297,7 @@ const MonitorearControladores = () => {
                     <View style={styles.cardsContainer2}>
                         {dataAutomatica &&
                             Object.entries(dataAutomatica)
-                                .filter(([, value]) => typeof value === 'boolean')
+                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
                                 .map(([key, value]) => (
                                     <Pressable
                                         key={key}
@@ -430,8 +375,8 @@ const styles = StyleSheet.create({
         padding: width * 0.05, // Ajustamos el padding según el ancho de la pantalla
         // borderWidth: 1,
         height: width * 0.7,
-      },
-      card2: {
+    },
+    card2: {
         width: width > 400 ? '30%' : '30%', // Tres elementos por fila en pantallas grandes, dos en pantallas pequeñas
         aspectRatio: 1, // Mantiene el elemento cuadrado
         marginBottom: 10, // Espaciado entre filas
@@ -440,7 +385,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#ccc',
-      },
+    },
     imageContainerEstados2: {
         justifyContent: 'center',
         alignItems: 'center',
