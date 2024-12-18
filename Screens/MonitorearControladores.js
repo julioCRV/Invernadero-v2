@@ -71,7 +71,7 @@ const MonitorearControladores = () => {
         } catch (error) {
             // Capturar y registrar cualquier error de la solicitud
             console.error('Error en la solicitud:', error);
-            alert('Error al realizar la solicitud. Por favor, intente nuevamente.');
+            alert(`Error al realizar la solicitud: ${error.message}. Por favor, intente nuevamente.`);
             navigation.navigate('InicioInvernadero');
         }
     };

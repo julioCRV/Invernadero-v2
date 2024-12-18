@@ -29,6 +29,7 @@ const IniciarSesion = ({ onLogin }) => {
 
             if (res.ok) {
                 console.log('Login successful', data);
+                alert(`login existoso ${data}`)
                 setTimeout(() => {
                     setIsLoading(false); // Detener el modal de carga
                 }, 1000); // Mantener el modal visible por 2 segundos antes de cerrar
