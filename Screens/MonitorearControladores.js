@@ -15,66 +15,76 @@ const MonitorearControladores = () => {
     const [loading, setLoading] = useState(false); // Estado de carga
 
     const fetchControllerInfo = async () => {
-        try {
-            // Realizar la solicitud HTTP
-            const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    controller_code: item.cod_controller
-                })
-            });
-
-            // Verificar si la respuesta es exitosa
-            const data = await response.json();
-            if (response.ok) {
-                // Verifica si los datos son un objeto
-                if (data && typeof data === 'object') {
-                    // Traducir claves de datos
-                    const translatedData = {
-                        manual_heating: data.manual_heating,
-                        manual_humedifier: data.manual_humedifier,
-                        manual_valve: data.manual_valve,
-                        manual_ventilation: data.manual_ventilation,
-                        Temperatura: data.temperature,
-                        Humedad: data.humidity,
-                    };
-
-                    const translatedData2 = {
-                        conection_controller: data.conection_controller,
-                        stable_humidity: data.stable_humidity,
-                        stable_temperature: data.stable_temperature,
-
-                        heating_activated: data.heating_activated,
-                        heating_desactivated: data.heating_deactivated,
-                        humedifier_activated: data.humedifier_activated,
-                        humedifier_desactivated: data.humedifier_deactivated,
-                        valve_activated: data.valve_activated,
-                        valve_desactivated: data.valve_deactivated,
-                        ventilation_activated: data.ventilation_activated,
-                        ventilation_desactivated: data.ventilation_deactivated,
-                    };
-
-                    // Actualizar estado con los datos traducidos
-                    setData(translatedData);
-                    setDataAutomatica(translatedData2);
+        let attempt = 0; // Contador de intentos
+        const maxAttempts = 2; // Máximo número de intentos
+    
+        while (attempt < maxAttempts) {
+            try {
+                // Realizar la solicitud HTTP
+                const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        controller_code: item.cod_controller,
+                    }),
+                });
+    
+                // Verificar si la respuesta es exitosa
+                const data = await response.json();
+                if (response.ok) {
+                    if (data && typeof data === 'object') {
+                        // Traducir claves de datos
+                        const translatedData = {
+                            manual_heating: data.manual_heating,
+                            manual_humedifier: data.manual_humedifier,
+                            manual_valve: data.manual_valve,
+                            manual_ventilation: data.manual_ventilation,
+                            Temperatura: data.temperature,
+                            Humedad: data.humidity,
+                        };
+    
+                        const translatedData2 = {
+                            conection_controller: data.conection_controller,
+                            stable_humidity: data.stable_humidity,
+                            stable_temperature: data.stable_temperature,
+                            heating_activated: data.heating_activated,
+                            heating_desactivated: data.heating_deactivated,
+                            humedifier_activated: data.humedifier_activated,
+                            humedifier_desactivated: data.humedifier_deactivated,
+                            valve_activated: data.valve_activated,
+                            valve_desactivated: data.valve_deactivated,
+                            ventilation_activated: data.ventilation_activated,
+                            ventilation_desactivated: data.ventilation_deactivated,
+                        };
+    
+                        // Actualizar estado con los datos traducidos
+                        setData(translatedData);
+                        setDataAutomatica(translatedData2);
+    
+                        // Si la solicitud fue exitosa, salir del bucle
+                        return;
+                    } else {
+                        console.error('Los datos recibidos no tienen el formato esperado:', data);
+                        alert('Error: Los datos no tienen el formato esperado.');
+                        return; // Salir si el formato no es correcto
+                    }
                 } else {
-                    // Si los datos no tienen el formato esperado
-                    console.error('Los datos recibidos no tienen el formato esperado:', data);
-                    alert('Error: Los datos no tienen el formato esperado.');
+                    console.error('Error en la respuesta:', data.message);
+                    alert('Error en la respuesta del servidor.');
+                    return; // Salir si la respuesta no es OK
                 }
-            } else {
-                // Si la respuesta no es OK
-                console.error('Error en la respuesta:', data.message);
-                alert('Error en la respuesta del servidor.');
+            } catch (error) {
+                attempt++; // Incrementar contador de intentos
+                console.error(`Intento ${attempt} fallido:`, error);
+    
+                if (attempt >= maxAttempts) {
+                    alert(`Error al realizar la solicitud después de ${maxAttempts} intentos: ${error.message}`);
+                    return; // Salir después de alcanzar el máximo de intentos
+                }
             }
-        } catch (error) {
-            // Capturar y registrar cualquier error de la solicitud
-            console.error('Error en la solicitud:', error);
-            alert(`Error al realizar la solicitud: ${error.message, data}. Por favor, intente nuevamente.`);
-            navigation.navigate('InicioInvernadero');
         }
     };
+    
 
 
     useEffect(() => {
@@ -90,7 +100,7 @@ const MonitorearControladores = () => {
         };
         fetchTwice();
     }, []);
-    
+
 
     // useEffect(() => {
     //     fetchControllerInfo(); // Llamada inicial
@@ -195,8 +205,6 @@ const MonitorearControladores = () => {
 
 
     };
-
-
 
     const getImageSource2 = (key) => {
         if (key.toLowerCase().includes('humedifier_activated') || key.toLowerCase().includes('humedifier_desactivated')) {
@@ -364,7 +372,7 @@ const MonitorearControladores = () => {
                     <View style={styles.cardsContainer2}>
                         {dataAutomatica &&
                             Object.entries(dataAutomatica)
-                            .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
+                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
                                 .map(([key, value]) => (
                                     <Pressable
                                         key={key}

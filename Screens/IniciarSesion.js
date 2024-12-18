@@ -62,7 +62,7 @@ const IniciarSesion = ({ onLogin }) => {
             // Cerrar el modal después de 3 segundos
             setTimeout(() => {
                 setIsLoginError(false);
-            }, 3000);
+            }, 1000);
             console.error('Error:', err);
             alert('Error de conexión');
         }
