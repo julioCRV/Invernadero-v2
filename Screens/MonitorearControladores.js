@@ -9,6 +9,7 @@ const MonitorearControladores = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { item } = route.params;
+    console.log(item);
     const [pressedKey, setPressedKey] = useState(null);
     const [data, setData] = useState(null);
     const [dataAutomatica, setDataAutomatica] = useState(null);
@@ -71,7 +72,7 @@ const MonitorearControladores = () => {
         } catch (error) {
             // Capturar y registrar cualquier error de la solicitud
             console.error('Error en la solicitud:', error);
-            alert('Error al realizar la solicitud. Por favor, intente nuevamente.');
+            alert(`Error al realizar la solicitud. Por favor, intente nuevamente. ${error.message}`);
         }
     };
     

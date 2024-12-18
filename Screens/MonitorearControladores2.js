@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Switch, Image, Dimensions, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Switch, Image, Dimensions, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -9,132 +9,76 @@ const MonitorearControladores = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { item } = route.params;
+    alert(`aqui esta tu item ${item}`);
     const [pressedKey, setPressedKey] = useState(null);
-    // const [data, setData] = useState(null);
-    // const [dataAutomatica, setDataAutomatica] = useState(null);
-    const data = {
-        manual_heating: false,
-        manual_humedifier: false,
-        manual_valve: false,
-        manual_ventilation: false,
-        Temperatura: 0, // Suponiendo que la temperatura por defecto es 0
-        Humedad: 0, // Suponiendo que la humedad por defecto es 0
-    };
+    const [data, setData] = useState(null);
+    const [dataAutomatica, setDataAutomatica] = useState(null);
 
-    const dataAutomatica = {
-        conection_controller: false,
-        stable_humidity: false,
-        stable_temperature: false,
-        heating_activated: false,
-        heating_desactivated: false,
-        humedifier_activated: false,
-        humedifier_desactivated: false,
-        valve_activated: false,
-        valve_desactivated: false,
-        ventilation_activated: false,
-        ventilation_desactivated: false,
-    };
-
-    const [loading, setLoading] = useState(false); // Estado de carga
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const fetchControllerInfo = async () => {
-        let attempt = 0; // Contador de intentos
-        const maxAttempts = 2; // Máximo número de intentos
+        try {
+            // Realizar la solicitud HTTP
+            const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    controller_code: item.cod_controller
+                })
+            });
 
-        while (attempt < maxAttempts) {
-            try {
-                // Realizar la solicitud HTTP
-                const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        controller_code: item.cod_controller,
-                    }),
-                });
-
-                // Verificar si la respuesta es exitosa
-                const data = await response.json();
-                if (response.ok) {
-                    if (data && typeof data === 'object') {
-                        // Traducir claves de datos
-                        const translatedData = {
-                            manual_heating: data.manual_heating,
-                            manual_humedifier: data.manual_humedifier,
-                            manual_valve: data.manual_valve,
-                            manual_ventilation: data.manual_ventilation,
-                            Temperatura: data.temperature,
-                            Humedad: data.humidity,
-                        };
-
-                        const translatedData2 = {
-                            conection_controller: data.conection_controller,
-                            stable_humidity: data.stable_humidity,
-                            stable_temperature: data.stable_temperature,
-                            heating_activated: data.heating_activated,
-                            heating_desactivated: data.heating_deactivated,
-                            humedifier_activated: data.humedifier_activated,
-                            humedifier_desactivated: data.humedifier_deactivated,
-                            valve_activated: data.valve_activated,
-                            valve_desactivated: data.valve_deactivated,
-                            ventilation_activated: data.ventilation_activated,
-                            ventilation_desactivated: data.ventilation_deactivated,
-                        };
-
-                        // Actualizar estado con los datos traducidos
-                        setData(translatedData);
-                        setDataAutomatica(translatedData2);
-
-                        // Si la solicitud fue exitosa, salir del bucle
-                        return;
-                    } else {
-                        console.error('Los datos recibidos no tienen el formato esperado:', data);
-                        alert('Error: Los datos no tienen el formato esperado.');
-                        return; // Salir si el formato no es correcto
-                    }
-                } else {
-                    console.error('Error en la respuesta:', data.message);
-                    alert('Error en la respuesta del servidor.');
-                    return; // Salir si la respuesta no es OK
-                }
-            } catch (error) {
-                attempt++; // Incrementar contador de intentos
-                console.error(`Intento ${attempt} fallido:`, error);
-
-                if (attempt >= maxAttempts) {
-                    alert(`Error al realizar la solicitud después de ${maxAttempts} intentos: ${error.message}`);
-                    return; // Salir después de alcanzar el máximo de intentos
-                }
+            // Verificar si la respuesta es exitosa
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData.error || 'Error en la respuesta del servidor.');
+                return;
             }
+
+            const dataResponse = await response.json();
+            if (dataResponse && typeof dataResponse === 'object') {
+                // Traducir claves de datos
+                const translatedData = {
+                    manual_heating: dataResponse.manual_heating,
+                    manual_humedifier: dataResponse.manual_humedifier,
+                    manual_valve: dataResponse.manual_valve,
+                    manual_ventilation: dataResponse.manual_ventilation,
+                    Temperatura: dataResponse.temperature,
+                    Humedad: dataResponse.humidity,
+                };
+
+                const translatedData2 = {
+                    conection_controller: dataResponse.conection_controller,
+                    stable_humidity: dataResponse.stable_humidity,
+                    stable_temperature: dataResponse.stable_temperature,
+                    heating_activated: dataResponse.heating_activated,
+                    heating_desactivated: dataResponse.heating_deactivated,
+                    humedifier_activated: dataResponse.humedifier_activated,
+                    humedifier_desactivated: dataResponse.humedifier_deactivated,
+                    valve_activated: dataResponse.valve_activated,
+                    valve_desactivated: dataResponse.valve_deactivated,
+                    ventilation_activated: dataResponse.ventilation_activated,
+                    ventilation_desactivated: dataResponse.ventilation_desactivated,
+                };
+
+                // Actualizar estados con los datos traducidos
+                setData(translatedData);
+                setDataAutomatica(translatedData2);
+                setError(null); // Limpiar el error si lo había.
+            } else {
+                setError('Los datos recibidos no tienen el formato esperado.');
+            }
+        } catch (fetchError) {
+            setError(`Error al realizar la solicitud: ${fetchError.message}`);
+        } finally {
+            setLoading(false); // Cambia el estado de carga a false, independiente del resultado.
         }
     };
 
+    useEffect(() => {
+        fetchControllerInfo();
+    }, []);
 
-
-    // useEffect(() => {
-    //     const fetchTwice = async () => {
-    //         try {
-    //             await fetchControllerInfo(); // Primera llamada
-    //             setTimeout(async () => {
-    //                 await fetchControllerInfo(); // Segunda llamada después de un retraso
-    //             }, 2000); // Retraso de 1 segundo (puedes ajustarlo)
-    //         } catch (error) {
-    //             console.error('Error en fetchTwice:', error);
-    //         }
-    //     };
-    //     fetchTwice();
-    // }, []);
-
-
-    // useEffect(() => {
-    //     fetchControllerInfo(); // Llamada inicial
-
-    //     const interval = setInterval(() => {
-    //         fetchControllerInfo(); // Llamada cada 10 segundos
-    //     }, 10000);
-
-    //     // Limpieza del intervalo
-    //     return () => clearInterval(interval);
-    // }, []);
 
     const handleChangeState = async (sensorType, newValue) => {
         if (dataAutomatica.conection_controller) {
@@ -293,6 +237,22 @@ const MonitorearControladores = () => {
         } else { return '' }
     }
 
+    // Renderizado condicional para manejar loading y error
+    if (loading) {
+        return (
+            <View>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View>
+                <Text>{error}</Text>
+            </View>
+        );
+    }
 
     return (
         <ImageBackground

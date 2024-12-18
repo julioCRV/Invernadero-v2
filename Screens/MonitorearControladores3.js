@@ -10,105 +10,74 @@ const MonitorearControladores = () => {
     const route = useRoute();
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
-    // const [data, setData] = useState(null);
-    // const [dataAutomatica, setDataAutomatica] = useState(null);
-    const data = {
-        manual_heating: false,
-        manual_humedifier: false,
-        manual_valve: false,
-        manual_ventilation: false,
-        Temperatura: 0, // Suponiendo que la temperatura por defecto es 0
-        Humedad: 0, // Suponiendo que la humedad por defecto es 0
-    };
-
-    const dataAutomatica = {
-        conection_controller: false,
-        stable_humidity: false,
-        stable_temperature: false,
-        heating_activated: false,
-        heating_desactivated: false,
-        humedifier_activated: false,
-        humedifier_desactivated: false,
-        valve_activated: false,
-        valve_desactivated: false,
-        ventilation_activated: false,
-        ventilation_desactivated: false,
-    };
-
+    const [data, setData] = useState(null);
+    const [dataAutomatica, setDataAutomatica] = useState(null);
     const [loading, setLoading] = useState(false); // Estado de carga
 
+    const [error, setError] = useState(null);
+
     const fetchControllerInfo = async () => {
-        let attempt = 0; // Contador de intentos
-        const maxAttempts = 2; // Máximo número de intentos
+        try {
+            // Realizar la solicitud HTTP
+            const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    controller_code: item.cod_controller
+                })
+            });
 
-        while (attempt < maxAttempts) {
-            try {
-                // Realizar la solicitud HTTP
-                const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        controller_code: item.cod_controller,
-                    }),
-                });
-
-                // Verificar si la respuesta es exitosa
-                const data = await response.json();
-                if (response.ok) {
-                    if (data && typeof data === 'object') {
-                        // Traducir claves de datos
-                        const translatedData = {
-                            manual_heating: data.manual_heating,
-                            manual_humedifier: data.manual_humedifier,
-                            manual_valve: data.manual_valve,
-                            manual_ventilation: data.manual_ventilation,
-                            Temperatura: data.temperature,
-                            Humedad: data.humidity,
-                        };
-
-                        const translatedData2 = {
-                            conection_controller: data.conection_controller,
-                            stable_humidity: data.stable_humidity,
-                            stable_temperature: data.stable_temperature,
-                            heating_activated: data.heating_activated,
-                            heating_desactivated: data.heating_deactivated,
-                            humedifier_activated: data.humedifier_activated,
-                            humedifier_desactivated: data.humedifier_deactivated,
-                            valve_activated: data.valve_activated,
-                            valve_desactivated: data.valve_deactivated,
-                            ventilation_activated: data.ventilation_activated,
-                            ventilation_desactivated: data.ventilation_deactivated,
-                        };
-
-                        // Actualizar estado con los datos traducidos
-                        setData(translatedData);
-                        setDataAutomatica(translatedData2);
-
-                        // Si la solicitud fue exitosa, salir del bucle
-                        return;
-                    } else {
-                        console.error('Los datos recibidos no tienen el formato esperado:', data);
-                        alert('Error: Los datos no tienen el formato esperado.');
-                        return; // Salir si el formato no es correcto
-                    }
-                } else {
-                    console.error('Error en la respuesta:', data.message);
-                    alert('Error en la respuesta del servidor.');
-                    return; // Salir si la respuesta no es OK
-                }
-            } catch (error) {
-                attempt++; // Incrementar contador de intentos
-                console.error(`Intento ${attempt} fallido:`, error);
-
-                if (attempt >= maxAttempts) {
-                    alert(`Error al realizar la solicitud después de ${maxAttempts} intentos: ${error.message}`);
-                    return; // Salir después de alcanzar el máximo de intentos
-                }
+            // Verificar si la respuesta es exitosa
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData.error || 'Error en la respuesta del servidor.');
+                return;
             }
+
+            const dataResponse = await response.json();
+            if (dataResponse && typeof dataResponse === 'object') {
+                // Traducir claves de datos
+                const translatedData = {
+                    manual_heating: dataResponse.manual_heating,
+                    manual_humedifier: dataResponse.manual_humedifier,
+                    manual_valve: dataResponse.manual_valve,
+                    manual_ventilation: dataResponse.manual_ventilation,
+                    Temperatura: dataResponse.temperature,
+                    Humedad: dataResponse.humidity,
+                };
+
+                const translatedData2 = {
+                    conection_controller: dataResponse.conection_controller,
+                    stable_humidity: dataResponse.stable_humidity,
+                    stable_temperature: dataResponse.stable_temperature,
+                    heating_activated: dataResponse.heating_activated,
+                    heating_desactivated: dataResponse.heating_deactivated,
+                    humedifier_activated: dataResponse.humedifier_activated,
+                    humedifier_desactivated: dataResponse.humedifier_deactivated,
+                    valve_activated: dataResponse.valve_activated,
+                    valve_desactivated: dataResponse.valve_deactivated,
+                    ventilation_activated: dataResponse.ventilation_activated,
+                    ventilation_desactivated: dataResponse.ventilation_desactivated,
+                };
+
+                // Actualizar estados con los datos traducidos
+                setData(translatedData);
+                setDataAutomatica(translatedData2);
+                setError(null); // Limpiar el error si lo había.
+            } else {
+                setError('Los datos recibidos no tienen el formato esperado.');
+            }
+        } catch (fetchError) {
+            setError(`Error al realizar la solicitud: ${fetchError.message}`);
+        } finally {
+            setLoading(false); // Cambia el estado de carga a false, independiente del resultado.
         }
     };
 
 
+    useEffect(() => {
+        fetchControllerInfo();
+    }, []);
 
     // useEffect(() => {
     //     const fetchTwice = async () => {
@@ -300,131 +269,143 @@ const MonitorearControladores = () => {
             style={styles.container}
             resizeMode="cover"
         >
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}>
-                <Text>Monitor 3</Text>
-                <Text style={styles.title}>{item.details.controller_title}</Text>
-                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
-                    <Text style={styles.sectionTitle}>Sensores</Text>
-                    <View style={styles.cardsContainer1}>
-                        {data &&
-                            Object.entries(data)
-                                .filter(([, value]) => typeof value !== 'boolean')
-                                .map(([key, value]) => {
-                                    // Agrega los símbolos según la clave
-                                    const displayValue = key === 'Temperatura'
-                                        ? `${value}°C`
-                                        : key === 'Humedad'
-                                            ? `${value}%`
-                                            : value;
 
-                                    // Selecciona el ícono según la clave
-                                    const iconName = key === 'Temperatura'
-                                        ? 'thermometer'
-                                        : key === 'Humedad'
-                                            ? 'tint'
-                                            : null;
-
-                                    return (
-                                        <View key={key} style={styles.card1}>
-                                            {iconName && (
-                                                <Icon
-                                                    name={iconName}
-                                                    size={20}
-                                                    color="#000"
-                                                    style={{ marginRight: 3, marginTop: -10, color: '#12862F' }}
-                                                />
-                                            )}
-                                            <Text style={styles.label}>
-                                                {key.replace(/_/g, ' ')}: {displayValue}
-                                            </Text>
-                                        </View>
-                                    );
-                                })}
-                    </View>
+            {/* Verificar si los datos están cargados */}
+            {(data === null || dataAutomatica === null) ? (
+                // Mostrar indicador de carga o un mensaje si los datos aún no están disponibles
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                    <Text>Cargando...</Text>
                 </View>
+            ) : (
+                // Si los datos están disponibles, renderizar el 
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}>
+                    <Text>Monitor 3</Text>
+                    <Text style={styles.title}>{item.details.controller_title}</Text>
+                    <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
+                        <Text style={styles.sectionTitle}>Sensores</Text>
+                        <View style={styles.cardsContainer1}>
+                            {data &&
+                                Object.entries(data)
+                                    .filter(([, value]) => typeof value !== 'boolean')
+                                    .map(([key, value]) => {
+                                        // Agrega los símbolos según la clave
+                                        const displayValue = key === 'Temperatura'
+                                            ? `${value}°C`
+                                            : key === 'Humedad'
+                                                ? `${value}%`
+                                                : value;
 
-                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
-                    <Text style={styles.sectionTitle}>Control Manual</Text>
-                    {/* {loading && <ActivityIndicator size="large" color="black" />} */}
-                    <View style={styles.cardsContainer}>
-                        {data &&
-                            Object.entries(data)
-                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
-                                .map(([key, value]) => (
-                                    <TouchableOpacity
-                                        key={key}
-                                        style={[
-                                            styles.card,
-                                            { backgroundColor: value ? 'white' : 'white' }, // Cambia el color de fondo según el valor de `value`
-                                        ]}
-                                        onPress={() => handleChangeState(key, !value)}
-                                    >
-                                        <View style={styles.columnContainer}>
-                                            <View style={styles.columnLeft}>
-                                                <View style={styles.imageContainerEstados}>
-                                                    <Image
-                                                        source={getImageSource(key.replace(/_/g, ' '), value)}
-                                                        style={styles.statusImage}
+                                        // Selecciona el ícono según la clave
+                                        const iconName = key === 'Temperatura'
+                                            ? 'thermometer'
+                                            : key === 'Humedad'
+                                                ? 'tint'
+                                                : null;
+
+                                        return (
+                                            <View key={key} style={styles.card1}>
+                                                {iconName && (
+                                                    <Icon
+                                                        name={iconName}
+                                                        size={20}
+                                                        color="#000"
+                                                        style={{ marginRight: 3, marginTop: -10, color: '#12862F' }}
+                                                    />
+                                                )}
+                                                <Text style={styles.label}>
+                                                    {key.replace(/_/g, ' ')}: {displayValue}
+                                                </Text>
+                                            </View>
+                                        );
+                                    })}
+                        </View>
+                    </View>
+
+                    <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
+                        <Text style={styles.sectionTitle}>Control Manual</Text>
+                        {/* {loading && <ActivityIndicator size="large" color="black" />} */}
+                        <View style={styles.cardsContainer}>
+                            {data &&
+                                Object.entries(data)
+                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
+                                    .map(([key, value]) => (
+                                        <TouchableOpacity
+                                            key={key}
+                                            style={[
+                                                styles.card,
+                                                { backgroundColor: value ? 'white' : 'white' }, // Cambia el color de fondo según el valor de `value`
+                                            ]}
+                                            onPress={() => handleChangeState(key, !value)}
+                                        >
+                                            <View style={styles.columnContainer}>
+                                                <View style={styles.columnLeft}>
+                                                    <View style={styles.imageContainerEstados}>
+                                                        <Image
+                                                            source={getImageSource(key.replace(/_/g, ' '), value)}
+                                                            style={styles.statusImage}
+                                                        />
+                                                    </View>
+                                                    <Text style={styles.labelEstados}>{getNombre(key)}</Text>
+                                                    {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
+                                                </View>
+
+                                                <View style={styles.columnRight}>
+                                                    <Switch
+                                                        value={value}
+                                                        onValueChange={() => handleChangeState(key, !value)}
+                                                        thumbColor="white"
+                                                        trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
+                                                        disabled={!dataAutomatica.conection_controller}
+                                                        style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch}  // Aplica estilo adicional cuando está deshabilitado
                                                     />
                                                 </View>
-                                                <Text style={styles.labelEstados}>{getNombre(key)}</Text>
-                                                {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
                                             </View>
+                                            {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
+                                        </TouchableOpacity>
+                                    ))}
+                        </View>
+                    </View>
 
-                                            <View style={styles.columnRight}>
-                                                <Switch
-                                                    value={value}
-                                                    onValueChange={() => handleChangeState(key, !value)}
-                                                    thumbColor="white"
-                                                    trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
-                                                    disabled={!dataAutomatica.conection_controller}
-                                                    style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch}  // Aplica estilo adicional cuando está deshabilitado
+                    <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
+                        <Text style={styles.sectionTitle}>Controladores Automáticos</Text>
+                        <View style={styles.cardsContainer2}>
+                            {dataAutomatica &&
+                                Object.entries(dataAutomatica)
+                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
+                                    .map(([key, value]) => (
+                                        <Pressable
+                                            key={key}
+                                            style={({ pressed }) => [
+                                                styles.card2,
+                                                {
+                                                    backgroundColor: value ? 'white' : '#f0f0f0',
+                                                    opacity: pressed ? 1 : 1, // Mantén la opacidad fija incluso al presionar
+                                                },
+                                            ]}
+                                            onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
+                                            onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar<
+                                        >
+                                            <View style={styles.imageContainerEstados2}>
+                                                <Image
+                                                    source={getImageSource2(key)}
+                                                    style={[styles.statusImage2, getImageStyle(key, value)]} // Agrega el estilo dinámico
                                                 />
                                             </View>
-                                        </View>
-                                        {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
-                                    </TouchableOpacity>
-                                ))}
+
+                                            {pressedKey === key && (
+                                                <Text style={styles.pressedText}>{getNombre2(key)}</Text> // Mostrar texto
+                                            )}
+                                        </Pressable>
+                                    ))}
+                        </View>
                     </View>
-                </View>
 
-                <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12 }}>
-                    <Text style={styles.sectionTitle}>Controladores Automáticos</Text>
-                    <View style={styles.cardsContainer2}>
-                        {dataAutomatica &&
-                            Object.entries(dataAutomatica)
-                                .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
-                                .map(([key, value]) => (
-                                    <Pressable
-                                        key={key}
-                                        style={({ pressed }) => [
-                                            styles.card2,
-                                            {
-                                                backgroundColor: value ? 'white' : '#f0f0f0',
-                                                opacity: pressed ? 1 : 1, // Mantén la opacidad fija incluso al presionar
-                                            },
-                                        ]}
-                                        onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
-                                        onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar<
-                                    >
-                                        <View style={styles.imageContainerEstados2}>
-                                            <Image
-                                                source={getImageSource2(key)}
-                                                style={[styles.statusImage2, getImageStyle(key, value)]} // Agrega el estilo dinámico
-                                            />
-                                        </View>
+                </ScrollView>
+            )}
 
-                                        {pressedKey === key && (
-                                            <Text style={styles.pressedText}>{getNombre2(key)}</Text> // Mostrar texto
-                                        )}
-                                    </Pressable>
-                                ))}
-                    </View>
-                </View>
-
-            </ScrollView>
         </ImageBackground>
     );
 }

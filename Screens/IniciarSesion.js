@@ -17,6 +17,42 @@ const IniciarSesion = ({ onLogin }) => {
 
     const logueo = async () => {
         try {
+            setIsLoading(true);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout de 5 segundos
+
+            const res = await fetch('https://gmb-tci.onrender.com/user/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId); // Limpiar timeout si la solicitud se completa antes
+
+            if (!res.ok) {
+                throw new Error('Login failed');
+            }
+
+            const data = await res.json();
+            setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
+            setIsLoginSuccess(true); // Mostrar el modal de éxito
+
+            // Cerrar el modal de éxito y llamar a la función onLogin después de 1 segundo
+            setTimeout(() => {
+                setIsLoginSuccess(false);  // Cerrar el modal de éxito
+                onLogin(data); // Llamar a la función onLogin (si la tienes)
+            }, 3000);
+        } catch (err) {
+            setIsLoading(false);
+            setErrorMessage('Error de conexión o solicitud cancelada');
+            console.error(err);
+        }
+    };
+
+    const logueo2 = async () => {
+        try {
             setIsLoading(true); // Inicia el modal de carga
 
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
@@ -29,6 +65,7 @@ const IniciarSesion = ({ onLogin }) => {
 
             if (res.ok) {
                 console.log('Login successful', data);
+                // alert(`Login existosooooooooooo ${data.user_code}`); 
                 // Aquí, en vez de usar setTimeout, gestionamos el cierre del modal sin demoras innecesarias
                 setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
                 setIsLoginSuccess(true); // Mostrar el modal de éxito
@@ -37,7 +74,7 @@ const IniciarSesion = ({ onLogin }) => {
                 setTimeout(() => {
                     setIsLoginSuccess(false);  // Cerrar el modal de éxito
                     onLogin(data); // Llamar a la función onLogin (si la tienes)
-                }, 1000);
+                }, 3000);
 
             } else {
                 // Manejo de error
@@ -68,17 +105,6 @@ const IniciarSesion = ({ onLogin }) => {
         }
     };
 
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    const submitLogin = async () => {
-        try {
-            await logueo(); // Primera llamada
-            await delay(1000); // Retraso de 1 segundo
-            await logueo(); // Segunda llamada
-        } catch (error) {
-            console.error("Error ejecutando logueo dos veces con retraso:", error);
-        }
-    };
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={color.primary} />
@@ -120,7 +146,7 @@ const IniciarSesion = ({ onLogin }) => {
                 </View>
 
 
-                <Pressable title="Login" onPress={submitLogin} style={styles.button}>
+                <Pressable title="Login" onPress={logueo} style={styles.button}>
                     <Text style={styles.buttonText}>Iniciar Sesión</Text>
                 </Pressable>
             </View>

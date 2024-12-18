@@ -194,8 +194,7 @@ const MonitorearControladores = () => {
             return 'Temperatura'
         } else { return '' }
     }
-
-
+    
     return (
         <ImageBackground
             backgroundColor='#EDFDF2'
