@@ -10,14 +10,37 @@ const MonitorearControladores = () => {
     const route = useRoute();
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
-    const [data, setData] = useState(null);
-    const [dataAutomatica, setDataAutomatica] = useState(null);
+    // const [data, setData] = useState(null);
+    // const [dataAutomatica, setDataAutomatica] = useState(null);
+    const data = {
+        manual_heating: false,
+        manual_humedifier: false,
+        manual_valve: false,
+        manual_ventilation: false,
+        Temperatura: 0, // Suponiendo que la temperatura por defecto es 0
+        Humedad: 0, // Suponiendo que la humedad por defecto es 0
+    };
+
+    const dataAutomatica = {
+        conection_controller: false,
+        stable_humidity: false,
+        stable_temperature: false,
+        heating_activated: false,
+        heating_desactivated: false,
+        humedifier_activated: false,
+        humedifier_desactivated: false,
+        valve_activated: false,
+        valve_desactivated: false,
+        ventilation_activated: false,
+        ventilation_desactivated: false,
+    };
+
     const [loading, setLoading] = useState(false); // Estado de carga
 
     const fetchControllerInfo = async () => {
         let attempt = 0; // Contador de intentos
         const maxAttempts = 2; // Máximo número de intentos
-    
+
         while (attempt < maxAttempts) {
             try {
                 // Realizar la solicitud HTTP
@@ -28,7 +51,7 @@ const MonitorearControladores = () => {
                         controller_code: item.cod_controller,
                     }),
                 });
-    
+
                 // Verificar si la respuesta es exitosa
                 const data = await response.json();
                 if (response.ok) {
@@ -42,7 +65,7 @@ const MonitorearControladores = () => {
                             Temperatura: data.temperature,
                             Humedad: data.humidity,
                         };
-    
+
                         const translatedData2 = {
                             conection_controller: data.conection_controller,
                             stable_humidity: data.stable_humidity,
@@ -56,11 +79,11 @@ const MonitorearControladores = () => {
                             ventilation_activated: data.ventilation_activated,
                             ventilation_desactivated: data.ventilation_deactivated,
                         };
-    
+
                         // Actualizar estado con los datos traducidos
                         setData(translatedData);
                         setDataAutomatica(translatedData2);
-    
+
                         // Si la solicitud fue exitosa, salir del bucle
                         return;
                     } else {
@@ -76,7 +99,7 @@ const MonitorearControladores = () => {
             } catch (error) {
                 attempt++; // Incrementar contador de intentos
                 console.error(`Intento ${attempt} fallido:`, error);
-    
+
                 if (attempt >= maxAttempts) {
                     alert(`Error al realizar la solicitud después de ${maxAttempts} intentos: ${error.message}`);
                     return; // Salir después de alcanzar el máximo de intentos
@@ -84,22 +107,22 @@ const MonitorearControladores = () => {
             }
         }
     };
-    
 
 
-    useEffect(() => {
-        const fetchTwice = async () => {
-            try {
-                await fetchControllerInfo(); // Primera llamada
-                setTimeout(async () => {
-                    await fetchControllerInfo(); // Segunda llamada después de un retraso
-                }, 2000); // Retraso de 1 segundo (puedes ajustarlo)
-            } catch (error) {
-                console.error('Error en fetchTwice:', error);
-            }
-        };
-        fetchTwice();
-    }, []);
+
+    // useEffect(() => {
+    //     const fetchTwice = async () => {
+    //         try {
+    //             await fetchControllerInfo(); // Primera llamada
+    //             setTimeout(async () => {
+    //                 await fetchControllerInfo(); // Segunda llamada después de un retraso
+    //             }, 2000); // Retraso de 1 segundo (puedes ajustarlo)
+    //         } catch (error) {
+    //             console.error('Error en fetchTwice:', error);
+    //         }
+    //     };
+    //     fetchTwice();
+    // }, []);
 
 
     // useEffect(() => {
