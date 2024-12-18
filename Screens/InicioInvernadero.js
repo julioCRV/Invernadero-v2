@@ -194,7 +194,7 @@ const BoxItem = ({ item, onReload }) => {
                             <>
                                 <Text style={style.modalTitulo}>Editar detalles</Text>
                                 <View style={{ padding: 15 }}>
-                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '700', paddingTop: 30, color: '#12682F' }}>Titulo:</Text>
+                                    <Text style={{ alignSelf: 'flex-start', fontWeight: '70', paddingTop: 30, color: '#12682F' }}>Titulo:</Text>
                                     <TextInput
                                         style={style.modalText}
                                         value={titulo}

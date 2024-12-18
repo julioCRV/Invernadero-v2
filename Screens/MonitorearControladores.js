@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, StyleSheet, Switch, Image, Dimensions, TouchableOpacity, ImageBackground, Pressable, ActivityIndicator } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
-import { FontAwesomeIcon } from '@expo/vector-icons/FontAwesome6';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const MonitorearControladores = () => {
@@ -15,6 +14,7 @@ const MonitorearControladores = () => {
 
     const fetchControllerInfo = async () => {
         try {
+            // Realizar la solicitud HTTP
             const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -22,12 +22,13 @@ const MonitorearControladores = () => {
                     controller_code: item.cod_controller
                 })
             });
-
+    
+            // Verificar si la respuesta es exitosa
             const data = await response.json();
-
             if (response.ok) {
-                // Verifica si data es un objeto y traduce las claves
+                // Verifica si los datos son un objeto
                 if (data && typeof data === 'object') {
+                    // Traducir claves de datos
                     const translatedData = {
                         manual_heating: data.manual_heating,
                         manual_humedifier: data.manual_humedifier,
@@ -36,12 +37,12 @@ const MonitorearControladores = () => {
                         Temperatura: data.temperature,
                         Humedad: data.humidity,
                     };
-
+    
                     const translatedData2 = {
                         conection_controller: data.conection_controller,
                         stable_humidity: data.stable_humidity,
                         stable_temperature: data.stable_temperature,
-
+    
                         heating_activated: data.heating_activated,
                         heating_desactivated: data.heating_deactivated,
                         humedifier_activated: data.humedifier_activated,
@@ -50,21 +51,31 @@ const MonitorearControladores = () => {
                         valve_desactivated: data.valve_deactivated,
                         ventilation_activated: data.ventilation_activated,
                         ventilation_desactivated: data.ventilation_deactivated,
-
                     };
-
+    
+                    // Actualizar estado con los datos traducidos
                     setData(translatedData);
                     setDataAutomatica(translatedData2);
                 } else {
+                    // Si los datos no tienen el formato esperado
                     console.error('Los datos recibidos no tienen el formato esperado:', data);
+                    alert('Error: Los datos no tienen el formato esperado.');
                 }
             } else {
+                // Si la respuesta no es OK
                 console.error('Error en la respuesta:', data.message);
+                alert('Error en la respuesta del servidor.');
             }
         } catch (error) {
+            // Capturar y registrar cualquier error de la solicitud
             console.error('Error en la solicitud:', error);
+            alert('Error al realizar la solicitud. Por favor, intente nuevamente.');
+            
+            // Aquí puedes también agregar el reporte de errores a una plataforma externa como Sentry (si está configurado)
+            // Sentry.captureException(error);
         }
     };
+    
 
     useEffect(() => {
         fetchControllerInfo();
@@ -102,6 +113,7 @@ const MonitorearControladores = () => {
 
             if (!url || !bodyKey) {
                 console.error('Tipo de sensor no válido');
+                alert('Tipo de sensor no válido');
                 return;
             }
 
@@ -124,9 +136,11 @@ const MonitorearControladores = () => {
                     console.log('Datos actualizados');
                 } else {
                     console.error('Error en la respuesta:', data.message);
+                    alert('Error en la respuesta:', data.message);
                 }
             } catch (error) {
                 console.error('Error en la solicitud:', error);
+                alert('Error en la solicitud:', error);
             } finally {
                 setLoading(false); // Finaliza el estado de carga
             }
@@ -291,7 +305,7 @@ const MonitorearControladores = () => {
 
                 <View style={{ backgroundColor: 'white', padding: 20, margin: 10, borderWidth: 0.2, borderRadius: 12, }}>
                     <Text style={styles.sectionTitle}>Control Manual</Text>
-                    {loading && <ActivityIndicator size="large" color="black" />}
+                    {/* {loading && <ActivityIndicator size="large" color="black" />} */}
                     <View style={styles.cardsContainer}>
                         {data &&
                             Object.entries(data)
