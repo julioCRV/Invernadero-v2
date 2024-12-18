@@ -3,8 +3,10 @@ import { ScrollView, View, Text, StyleSheet, Switch, Image, Dimensions, Touchabl
 import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 const MonitorearControladores = () => {
+    const navigation = useNavigation();
     const route = useRoute();
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
@@ -70,9 +72,7 @@ const MonitorearControladores = () => {
             // Capturar y registrar cualquier error de la solicitud
             console.error('Error en la solicitud:', error);
             alert('Error al realizar la solicitud. Por favor, intente nuevamente.');
-            
-            // Aquí puedes también agregar el reporte de errores a una plataforma externa como Sentry (si está configurado)
-            // Sentry.captureException(error);
+            navigation.navigate('InicioInvernadero');
         }
     };
     

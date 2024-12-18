@@ -42,7 +42,6 @@ const IniciarSesion = ({ onLogin }) => {
                 }, 1000);
 
             } else {
-                console.error('Login failed', data.message);
                 setTimeout(() => {
                     setIsLoading(false); // Detener el modal de carga
                 }, 2000); // Mostrar el mensaje de error por 2 segundos
@@ -53,9 +52,10 @@ const IniciarSesion = ({ onLogin }) => {
                 setTimeout(() => {
                     setIsLoginError(false);
                 }, 3000);
+                console.error('Login failed', data.message);
+                alert('Login failed');
             }
         } catch (err) {
-            console.error('Error:', err);
             setLoginMessage('Error de conexión');
             setTimeout(() => {
                 setIsLoading(false); // Detener el modal de carga
@@ -67,6 +67,8 @@ const IniciarSesion = ({ onLogin }) => {
             setTimeout(() => {
                 setIsLoginError(false);
             }, 3000);
+            console.error('Error:', err);
+            alert('Error:');
         }
     };
 
