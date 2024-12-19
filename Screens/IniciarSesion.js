@@ -34,74 +34,19 @@ const IniciarSesion = ({ onLogin }) => {
             if (!res.ok) {
                 throw new Error('Login failed');
             }
-
             const data = await res.json();
             setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
             setIsLoginSuccess(true); // Mostrar el modal de éxito
 
-            // Cerrar el modal de éxito y llamar a la función onLogin después de 1 segundo
+            // Cerrar el modal de éxito y llamar a la función onLogin después de 2 segundo
             setTimeout(() => {
                 setIsLoginSuccess(false);  // Cerrar el modal de éxito
                 onLogin(data); // Llamar a la función onLogin (si la tienes)
-            }, 3000);
+            }, 2000);
         } catch (err) {
             setIsLoading(false);
             setErrorMessage('Error de conexión o solicitud cancelada');
             console.error(err);
-        }
-    };
-
-    const logueo2 = async () => {
-        try {
-            setIsLoading(true); // Inicia el modal de carga
-
-            const res = await fetch('https://gmb-tci.onrender.com/user/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                console.log('Login successful', data);
-                // alert(`Login existosooooooooooo ${data.user_code}`); 
-                // Aquí, en vez de usar setTimeout, gestionamos el cierre del modal sin demoras innecesarias
-                setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
-                setIsLoginSuccess(true); // Mostrar el modal de éxito
-
-                // Cerrar el modal de éxito y llamar a la función onLogin después de 1 segundo
-                setTimeout(() => {
-                    setIsLoginSuccess(false);  // Cerrar el modal de éxito
-                    onLogin(data); // Llamar a la función onLogin (si la tienes)
-                }, 3000);
-
-            } else {
-                // Manejo de error
-                setIsLoading(false); // Detener el modal de carga
-                setErrorMessage('Error: Usuario o contraseña incorrectos');
-                setIsLoginError(true);
-
-                // Cerrar el modal de error después de 3 segundos
-                setTimeout(() => {
-                    setIsLoginError(false);
-                }, 3000);
-                console.error('Login failed', data.message);
-                alert('Login failed');
-            }
-        } catch (err) {
-            // Manejo de error de conexión
-            setIsLoading(false); // Detener el modal de carga
-            setLoginMessage('Error de conexión');
-            setErrorMessage('Error de conexión');
-            setIsLoginError(true);
-
-            // Cerrar el modal después de 3 segundos
-            setTimeout(() => {
-                setIsLoginError(false);
-            }, 1000);
-            console.error('Error:', err);
-            alert('Error de conexión');
         }
     };
 

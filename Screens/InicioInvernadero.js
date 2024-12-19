@@ -1,16 +1,11 @@
-import { Dimensions, FlatList, Image, Modal, Pressable, StatusBar, ImageBackground, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, TextInput } from "react-native"
+import { Dimensions, FlatList, Image, Modal, Pressable, StatusBar, StyleSheet, Text, TouchableOpacity, ActivityIndicator, View, TextInput } from "react-native"
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Octicons from '@expo/vector-icons/Octicons';
 import Foundation from '@expo/vector-icons/Foundation';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-
-import AntDesign from '@expo/vector-icons/AntDesign';
-import Feather from '@expo/vector-icons/Feather';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import IconPlanta from '../assets/iconPlanta.png';
-import { useRoute } from '@react-navigation/native';
 
 const cropImages = {
     1: require('../assets/zanahoria.png'),
@@ -18,6 +13,8 @@ const cropImages = {
     3: require('../assets/tomate.png'),
     4: require('../assets/frutilla.png'),
 };
+const screenWidth = Dimensions.get('window').width;
+
 const BoxItem = ({ item, onReload }) => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
@@ -30,7 +27,6 @@ const BoxItem = ({ item, onReload }) => {
         cod: item.details.controller_title,
     });
 
-    // console.log(editedData);
     const [crops, setCrops] = useState([]);
 
     const [selectedCrop, setSelectedCrop] = useState(null);
@@ -38,16 +34,6 @@ const BoxItem = ({ item, onReload }) => {
     const [descripcion, setDescripcion] = useState('');
     const [tipo, setTipo] = useState('');
 
-    // // Efecto para inicializar las variables con editedData cuando el componente se monta
-    // useEffect(() => {
-    //     if (editedData) {
-    //         setTitulo(editedData.tipe || '');
-    //         setDescripcion(editedData.description || '');
-    //         setTipo(editedData.feature || '');
-    //         setSelectedCrop(crops.find(crop => crop.crop_code === editedData.cod) || '');
-    //     }
-    //     // console.log("Valores inicializados:", { titulo, descripcion, tipo });
-    // }, [goEditar]);
 
     useEffect(() => {
         setEditedData({
@@ -96,23 +82,6 @@ const BoxItem = ({ item, onReload }) => {
         navigation.navigate('Monitorear', { item });
     }
 
-    const goMonitorear1 = () => {
-        navigation.navigate('Monitorear1', { item });
-    }
-    const goMonitorear2 = () => {
-        navigation.navigate('Monitorear2', { item });
-    }
-    const goMonitorear3 = () => {
-        navigation.navigate('Monitorear3', { item });
-    }
-    const goMonitorear4 = () => {
-        navigation.navigate('Monitorear4', { item });
-    }
-
-
-
-
-
     const goDashboard = () => {
         //Click en Dashboard
         navigation.navigate('Dashboard', { item });
@@ -121,7 +90,6 @@ const BoxItem = ({ item, onReload }) => {
         setTitulo(item.details.controller_title);
         setDescripcion(item.details.controller_description);
         setTipo(editedData.feature || '');
-        // setSelectedCrop(it);
 
         setModalVisible(true);
         setIsEditing(true);
@@ -221,8 +189,8 @@ const BoxItem = ({ item, onReload }) => {
                                         value={descripcion}
                                         onChangeText={handleDescripcionChange}
                                         multiline={true} // Permite múltiples líneas
-                                        numberOfLines={20} // Número de líneas visibles por defecto
-                                        style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, }}
+                                        numberOfLines={10} // Número de líneas visibles por defecto
+                                        style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, height: Math.max(35, descripcion.length / 10 * 8) , padding: 7}}
                                     />
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Cultivo:</Text>
                                     <FlatList
@@ -283,7 +251,7 @@ const BoxItem = ({ item, onReload }) => {
 
             <Image
                 source={item.image} // Ruta relativa a la imagen local
-                style={{ width: 320, height: 100, borderRadius: 15 }} // Ajusta el tamaño de la imagen
+                style={{ width: screenWidth * 0.8 , height: screenWidth * 0.3, borderRadius: 15 }} // Ajusta el tamaño de la imagen
             />
             <Text style={styles.title2}>{item.details.controller_title}</Text>
 
@@ -298,37 +266,6 @@ const BoxItem = ({ item, onReload }) => {
                     />
                     <Text>Monitorear</Text>
                 </Pressable>
-
-
-                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear1()}>
-                    <Image
-                        source={IconPlanta} // Usa la imagen
-                        style={{ width: 24, height: 24, }}
-                    />
-                    <Text>Monitorear1</Text>
-                </Pressable>
-                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear2()}>
-                    <Image
-                        source={IconPlanta} // Usa la imagen
-                        style={{ width: 24, height: 24, }}
-                    />
-                    <Text>Monitorear2</Text>
-                </Pressable>
-                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear3()}>
-                    <Image
-                        source={IconPlanta} // Usa la imagen
-                        style={{ width: 24, height: 24, }}
-                    />
-                    <Text>Monitorear3</Text>
-                </Pressable>
-                <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear4()}>
-                    <Image
-                        source={IconPlanta} // Usa la imagen
-                        style={{ width: 24, height: 24, }}
-                    />
-                    <Text>Monitorear4</Text>
-                </Pressable>
-
 
                 <Pressable style={[styles.button, { backgroundColor: 'orange' }]} onPress={() => goDetalles()}>
                     <Ionicons name="newspaper-outline" size={24} color="black" />
@@ -348,8 +285,7 @@ const BoxItem = ({ item, onReload }) => {
 const InicioInvernadero = ({ dataCliente }) => {
     const [data, setData] = useState(null);
     const [reload, setReload] = useState(false); // Estado de recarga
-    // const { userData } = props.route.params;
-    // console.log( route, "hhhhhhhhhhh"); 
+    const [loading, setLoading] = useState(true);  // Estado de carga
 
     const fetchGetInvernaderos = async () => {
         try {
@@ -417,6 +353,10 @@ const InicioInvernadero = ({ dataCliente }) => {
         };
         setData(cleanControllers(data));
     };
+
+    useEffect(() => {
+        fetchGetInvernaderos();
+    }, []);
 
     useEffect(() => {
         fetchGetInvernaderos();
@@ -561,7 +501,7 @@ const styles = StyleSheet.create({
     },
     boxButtons: {
         width: '100%',
-        flexDirection: 'column',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10
     },
@@ -685,6 +625,8 @@ const style = StyleSheet.create({
         fontSize: 14,
         borderColor: 'black',
         borderWidth: 1,
+        height: 40,
+        padding: 7
     },
     modalTextVer: {
         color: '#12682F',
