@@ -25,7 +25,8 @@ const IniciarSesion = ({ onLogin }) => {
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
+                // body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
+                body: JSON.stringify({ user_name: username, password: password }),
                 signal: controller.signal,
             });
 
@@ -35,6 +36,7 @@ const IniciarSesion = ({ onLogin }) => {
                 throw new Error('Login failed');
             }
             const data = await res.json();
+            alert(`ingresandoo exitosoooooooo: ${data.user_code}`);
             setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
             setIsLoginSuccess(true); // Mostrar el modal de éxito
 
@@ -47,6 +49,7 @@ const IniciarSesion = ({ onLogin }) => {
             setIsLoading(false);
             setErrorMessage('Error de conexión o solicitud cancelada');
             console.error(err);
+            alert(`Error en la solicitud: ${err}`);
         }
     };
 

@@ -190,7 +190,7 @@ const BoxItem = ({ item, onReload }) => {
                                         onChangeText={handleDescripcionChange}
                                         multiline={true} // Permite múltiples líneas
                                         numberOfLines={10} // Número de líneas visibles por defecto
-                                        style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, height: Math.max(35, descripcion.length / 10 * 8) , padding: 7}}
+                                        style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, height: Math.max(35, descripcion.length / 10 * 8), padding: 7 }}
                                     />
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Cultivo:</Text>
                                     <FlatList
@@ -251,7 +251,7 @@ const BoxItem = ({ item, onReload }) => {
 
             <Image
                 source={item.image} // Ruta relativa a la imagen local
-                style={{ width: screenWidth * 0.8 , height: screenWidth * 0.3, borderRadius: 15 }} // Ajusta el tamaño de la imagen
+                style={{ width: screenWidth * 0.8, height: screenWidth * 0.3, borderRadius: 15 }} // Ajusta el tamaño de la imagen
             />
             <Text style={styles.title2}>{item.details.controller_title}</Text>
 
@@ -354,32 +354,65 @@ const InicioInvernadero = ({ dataCliente }) => {
         setData(cleanControllers(data));
     };
 
-    useEffect(() => {
-        fetchGetInvernaderos();
-    }, []);
+    // useEffect(() => {
+    //     fetchGetInvernaderos();
+    // }, []);
 
     useEffect(() => {
+        // Llama a fetchGetInvernaderos una vez
         fetchGetInvernaderos();
-    }, [reload]); // Dependencia de reload
 
-    const handleReload = () => {
-        setReload(prerv => !prerv); // Cambiar el valor de reload para recargar los datos
-    };
+        // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
+        const interval = setInterval(() => {
+            if (data === null) { // Solo realiza la llamada si data es null
+                fetchGetInvernaderos();
+            }
+        }, 5000);
+
+        // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
+        return () => clearInterval(interval);
+
+    }, [data]);
+
+    useEffect(() => {
+        // Llama a fetchGetInvernaderos una vez
+        fetchGetInvernaderos();
+
+        // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
+        const interval = setInterval(() => {
+            if (data === null) { // Solo realiza la llamada si data es null
+                fetchGetInvernaderos();
+            }
+        }, 5000);
+
+        // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
+        return () => clearInterval(interval);
+
+    }, [data]); // Dependencia en 'data' para que se ejecute cada vez que cambie
 
     return (
-        <View style={styles.container}>
-            <View style={styles.topBox}>
-                <Text style={styles.topTitle}>Green Manager TC</Text>
-            </View>
-            <View style={styles.bodybox}>
-                <Text style={styles.title}>Mis Invernaderos</Text>
-                <FlatList
-                    data={data}
-                    renderItem={({ item }) => <BoxItem item={item} onReload={handleReload} />}
-                    keyExtractor={item => item.id}
-                />
-            </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            {data ? (
+                // Si los datos están disponibles, muestra los invernaderos en un FlatList
+                <View style={styles.container}>
+                    <View style={styles.topBox}>
+                        <Text style={styles.topTitle}>Green Manager TC</Text>
+                    </View>
+                    <View style={styles.bodybox}>
+                        <Text style={styles.title}>Mis Invernaderos</Text>
+                        <FlatList
+                            data={data}
+                            renderItem={({ item }) => <BoxItem item={item} onReload={handleReload} />}
+                            keyExtractor={item => item.id}
+                        />
+                    </View>
+                </View>
+            ) : (
+                // Si data es null, muestra un indicador de carga
+                <ActivityIndicator size="large" color="#0000ff" />
+            )}
         </View>
+
     )
 }
 

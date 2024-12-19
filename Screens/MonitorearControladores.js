@@ -136,7 +136,7 @@ const MonitorearControladores = () => {
                 }
             } catch (error) {
                 console.error('Error en la solicitud:', error);
-                alert('Error en la solicitud:', error);
+                alert(`Error en la solicitud: ${error.message || error}`);
             } finally {
                 setLoading(false); // Finaliza el estado de carga
             }
