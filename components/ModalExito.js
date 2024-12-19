@@ -8,7 +8,7 @@ const SuccessModal = ({ visible, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Icon name="check-circle" size={20} color="green" />
-          <Text style={styles.successMessage}>Login exitoso</Text>
+          <Text style={styles.successMessage}>Inicio de sesión exitoso</Text>
         </View>
       </View>
     </Modal>

@@ -77,16 +77,16 @@ const MonitorearControladores = () => {
         fetchControllerInfo();
     }, []);
 
-    // useEffect(() => {
-    //     fetchControllerInfo(); // Llamada inicial
+    useEffect(() => {
+        fetchControllerInfo(); // Llamada inicial
 
-    //     const interval = setInterval(() => {
-    //         fetchControllerInfo(); // Llamada cada 10 segundos
-    //     }, 10000);
+        const interval = setInterval(() => {
+            fetchControllerInfo(); // Llamada cada 10 segundos
+        }, 10000);
 
-    //     // Limpieza del intervalo
-    //     return () => clearInterval(interval);
-    // }, []);
+        // Limpieza del intervalo
+        return () => clearInterval(interval);
+    }, []);
 
     const handleChangeState = async (sensorType, newValue) => {
         if (dataAutomatica.conection_controller) {
@@ -257,7 +257,7 @@ const MonitorearControladores = () => {
             {(data === null || dataAutomatica === null) ? (
                 // Mostrar indicador de carga o un mensaje si los datos aún no están disponibles
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
+                    <ActivityIndicator size="large" color="#19A44E" />
                     <Text>Cargando...</Text>
                 </View>
             ) : (

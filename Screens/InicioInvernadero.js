@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import IconPlanta from '../assets/iconPlanta.png';
+import SaveSuccessModal  from "../components/ModalGuardaExitoso";
 
 const cropImages = {
     1: require('../assets/zanahoria.png'),
@@ -111,6 +112,8 @@ const BoxItem = ({ item, onReload }) => {
         updateData(item);
     }, [item]); // Esto actualizará 'editedData' cada vez que 'item' cambie
 
+    const [isSaveModalVisible, setSaveModalVisible] = React.useState(false);
+
     const handleSave = async () => {
         const controllerData = {
             controller_code: item.cod_controller,
@@ -132,6 +135,11 @@ const BoxItem = ({ item, onReload }) => {
 
             if (response.ok) {
                 console.log('Actualización exitosa:', result);
+                // Aquí iría la lógica para guardar los datos
+                setSaveModalVisible(true);
+
+                // Cerrar el modal automáticamente después de 2 segundos
+                setTimeout(() => setSaveModalVisible(false), 2000);
                 onReload();
             } else {
                 console.error('Error en la actualización:', result.message);
@@ -154,7 +162,7 @@ const BoxItem = ({ item, onReload }) => {
 
     return (
         <View style={styles.box}>
-
+                <SaveSuccessModal visible={isSaveModalVisible} onClose={() => setSaveModalVisible(false)} />
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -358,21 +366,21 @@ const InicioInvernadero = ({ dataCliente }) => {
     //     fetchGetInvernaderos();
     // }, []);
 
-    useEffect(() => {
-        // Llama a fetchGetInvernaderos una vez
-        fetchGetInvernaderos();
+    // useEffect(() => {
+    //     // Llama a fetchGetInvernaderos una vez
+    //     fetchGetInvernaderos();
 
-        // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
-        const interval = setInterval(() => {
-            if (data === null) { // Solo realiza la llamada si data es null
-                fetchGetInvernaderos();
-            }
-        }, 5000);
+    //     // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
+    //     const interval = setInterval(() => {
+    //         if (data === null) { // Solo realiza la llamada si data es null
+    //             fetchGetInvernaderos();
+    //         }
+    //     }, 5000);
 
-        // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
-        return () => clearInterval(interval);
+    //     // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
+    //     return () => clearInterval(interval);
 
-    }, [data]);
+    // }, [data]);
 
     useEffect(() => {
         // Llama a fetchGetInvernaderos una vez
@@ -390,8 +398,12 @@ const InicioInvernadero = ({ dataCliente }) => {
 
     }, [data]); // Dependencia en 'data' para que se ejecute cada vez que cambie
 
+    const handleReload = () => {
+        setReload(prerv => !prerv); // Cambiar el valor de reload para recargar los datos
+    };
+
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <>
             {data ? (
                 // Si los datos están disponibles, muestra los invernaderos en un FlatList
                 <View style={styles.container}>
@@ -409,9 +421,9 @@ const InicioInvernadero = ({ dataCliente }) => {
                 </View>
             ) : (
                 // Si data es null, muestra un indicador de carga
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#19A44E" />
             )}
-        </View>
+        </>
 
     )
 }
