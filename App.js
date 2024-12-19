@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';;
 
 import InicioInvernadero from './Screens/InicioInvernadero';
 import IniciarSesion from './Screens/IniciarSesion';
@@ -33,7 +33,6 @@ const MainStack = ({ route }) => {
     </Stack.Navigator>
   );
 };
-
 
 
 const MyTabs = ({ handleLogout, dataCliente }) => {
@@ -99,8 +98,6 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
   );
 };
 
-
-
 const VistaInicio = ({ onFinish }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -132,6 +129,11 @@ export default function App() {
 
   const handleLogout = () => setIsAuthenticated(false);
   const handleIntroFinish = () => setShowIntro(false);
+
+  useEffect(() => {
+    // Forzamos una actualización de la pantalla de navegación al cambiar el estado
+  }, [dataCliente, isAuthenticated]); 
+
 
   return (
     <NavigationContainer>

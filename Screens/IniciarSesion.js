@@ -46,6 +46,7 @@ const IniciarSesion = ({ onLogin }) => {
             }
             const data = await res.json();
             // alert(`ingresandoo exitosoooooooo: ${data.user_code}`);
+            // console.log('Login successful', data);
             setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
             setIsLoginSuccess(true); // Mostrar el modal de éxito
 
@@ -61,7 +62,6 @@ const IniciarSesion = ({ onLogin }) => {
             } else {
                 setErrorMessage(` ${err}`);
             }
-
             console.error(err);
             // alert(`Error en la solicitud: ${err}`);
         }
