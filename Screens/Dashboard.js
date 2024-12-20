@@ -5,46 +5,17 @@ import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion } from "../assets/estadosDashboard/estadoDashboard";
 
 const Dashboard = () => {
-  const scrollViewRef = useRef(null); // Creamos un ref para el ScrollView
+  // Define las referencias y estados para manejar datos, gráficos y valores seleccionados
+  const scrollViewRef = useRef(null);
   const route = useRoute();
   const { item } = route.params;
-  // Simulamos los datos de temperatura y humedad de una semana (7 días)
-  const [data, setData] = useState({
-    temperature: [22, 24, 28, 29, 27, 30, 26],  // Simula datos de temperatura
-    humidity: [60, 65, 55, 70, 75, 68, 72],    // Simula datos de humedad
-  });
-
   const [dataTabla, setDataTabla] = useState(null);
   const [dataGrafica, setDataGrafica] = useState(null);
-  const [historicalData, setHistoricalData] = useState([]); // Estado para acumular datos históricos
-  const historicalData2 = [
-    { temperature: 30, humidity: 20, receivedAt: "20:41:34" },
-    { temperature: 28, humidity: 22, receivedAt: "20:42:34" },
-    { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }, { temperature: 27, humidity: 24, receivedAt: "20:43:34" },
-    { temperature: 29, humidity: 21, receivedAt: "20:44:34" },
-    { temperature: 31, humidity: 19, receivedAt: "20:45:34" },
-    { temperature: 32, humidity: 18, receivedAt: "20:46:34" },
-    { temperature: 30, humidity: 20, receivedAt: "20:47:34" }
-  ];
+  const [historicalData, setHistoricalData] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
   const [selectedValue2, setSelectedValue2] = useState(null);
 
+  // Obtiene la información del controlador, la ordena por fecha y hora, y la guarda en el estado
   const fetchControllerInfo = async () => {
     try {
       const response = await fetch('https://gmb-tci.onrender.com/controller/get_registers', {
@@ -61,11 +32,11 @@ const Dashboard = () => {
         const sortedData = data.sort((a, b) => {
           const dateA = new Date(`${a.date}T${a.hour}`);
           const dateB = new Date(`${b.date}T${b.hour}`);
-          return dateB - dateA; // Ordena de más reciente a menos reciente
+          return dateB - dateA;
         });
         const dataWithKeys = sortedData.map((item, index) => ({
           ...item,
-          id: index + 1 // Agrega un identificador basado en el índice (comenzando desde 1)
+          id: index + 1
         }));
         setDataTabla(dataWithKeys);
       } else {
@@ -76,6 +47,7 @@ const Dashboard = () => {
     }
   };
 
+  // Obtiene datos del gráfico, los compara con los previos y los guarda en el estado, incluyendo la hora de la solicitud
   const fetchDataGrafico = async () => {
     try {
       const response = await fetch('https://gmb-tci.onrender.com/controller/get_data', {
@@ -89,24 +61,15 @@ const Dashboard = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Obtiene la hora actual
         const now = new Date();
         const formattedTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-        // Agrega la hora a los datos
         const dataWithTime = { ...data, receivedAt: formattedTime };
-
-        // Compara si la temperatura o la humedad han cambiado
         if (
-          !dataGrafica || // Si es la primera llamada
-          data.temperature !== dataGrafica.temperature || // Cambios en temperatura
-          data.humidity !== dataGrafica.humidity // Cambios en humedad
+          !dataGrafica ||
+          data.temperature !== dataGrafica.temperature ||
+          data.humidity !== dataGrafica.humidity
         ) {
-          // Actualiza el estado de la última respuesta
-          console.log(dataWithTime);
           setDataGrafica(dataWithTime);
-
-          // Agrega los datos con hora al historial
           setHistoricalData((prevHistoricalData) => [...prevHistoricalData, dataWithTime]);
         }
       } else {
@@ -117,12 +80,13 @@ const Dashboard = () => {
     }
   };
 
-
+  // Ejecuta las funciones de obtención de datos cuando el componente se monta por primera vez
   useEffect(() => {
     fetchControllerInfo();
     fetchDataGrafico();
   }, []);
 
+  // Retorna el ícono correspondiente según el tipo de dispositivo
   const getDeviceIcon = (device) => {
     switch (device.toLowerCase()) {
       case "calefactor":
@@ -134,10 +98,11 @@ const Dashboard = () => {
       case "ventilacion":
         return ventilacion;
       default:
-        return null; // Si no coincide, no muestra un ícono
+        return null;
     }
   };
 
+  // Retorna el nombre correspondiente según el tipo de dispositivo
   const getNombre = (device) => {
     switch (device.toLowerCase()) {
       case "calefactor":
@@ -149,11 +114,11 @@ const Dashboard = () => {
       case "ventilacion":
         return "Ventilación";
       default:
-        return null; // Si no coincide, no muestra un ícono
+        return null;
     }
   };
 
-  // Se ejecuta cada 5 segundos para actualizar el gráfico
+  // Ejecuta la función fetchDataGrafico cada 4 segundos y limpia el intervalo cuando el componente se desmonte o los datos cambien
   useEffect(() => {
     const interval = setInterval(fetchDataGrafico, 4000);
     return () => clearInterval(interval);
@@ -334,7 +299,7 @@ const Dashboard = () => {
   );
 };
 
-// Estilos
+// Define los estilos de la pantalla, contenedores, imágenes y texto en la vista "Dashboard"
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -352,8 +317,8 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: '#FFF',
     flexDirection: 'row',
-    alignItems: 'center', // Centra el texto verticalmente
-    marginBottom: 0, // Asegura que no haya separación con los datos
+    alignItems: 'center',
+    marginBottom: 0,
   },
   title: {
     fontSize: 24,
@@ -416,7 +381,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginLeft: 15
   },
-
 });
 
 export default Dashboard;

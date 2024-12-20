@@ -4,19 +4,19 @@ import { useRoute } from '@react-navigation/native';
 import { calefaccion, humidificador, valvula, ventilacion, enchufe, temperatura, humedad } from "../assets/estados/estados";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+// Componente para manejar el proceso y diseño del monitoreo de un controlador en especifico.
 const MonitorearControladores = () => {
+    // Definición de estados y obtención de parámetros de la ruta para gestionar la información y el estado de carga.
     const route = useRoute();
     const { item } = route.params;
     const [pressedKey, setPressedKey] = useState(null);
     const [data, setData] = useState(null);
     const [dataAutomatica, setDataAutomatica] = useState(null);
-    const [loading, setLoading] = useState(false); // Estado de carga
+    const [loading, setLoading] = useState(false);
 
-    const [error, setError] = useState(null);
-
+    // Función para obtener la información del controlador, traducir los datos y actualizar los estados `data` y `dataAutomatica` con los valores correspondientes.
     const fetchControllerInfo = async () => {
         try {
-            // Realizar la solicitud HTTP
             const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_information', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -25,16 +25,13 @@ const MonitorearControladores = () => {
                 })
             });
 
-            // Verificar si la respuesta es exitosa
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.error || 'Error en la respuesta del servidor.');
                 return;
             }
 
             const dataResponse = await response.json();
             if (dataResponse && typeof dataResponse === 'object') {
-                // Traducir claves de datos
                 const translatedData = {
                     manual_heating: dataResponse.manual_heating,
                     manual_humedifier: dataResponse.manual_humedifier,
@@ -55,39 +52,38 @@ const MonitorearControladores = () => {
                     valve_activated: dataResponse.valve_activated,
                     valve_desactivated: dataResponse.valve_deactivated,
                     ventilation_activated: dataResponse.ventilation_activated,
-                    ventilation_desactivated: dataResponse.ventilation_desactivated,
+                    ventilation_desactivated: dataResponse.ventilation_deactivated,
                 };
 
-                // Actualizar estados con los datos traducidos
                 setData(translatedData);
                 setDataAutomatica(translatedData2);
-                setError(null); // Limpiar el error si lo había.
             } else {
-                setError('Los datos recibidos no tienen el formato esperado.');
+                console.log('Los datos recibidos no tienen el formato esperado.');
             }
         } catch (fetchError) {
-            setError(`Error al realizar la solicitud: ${fetchError.message}`);
+            console.error(`Error al realizar la solicitud: ${fetchError.message}`);
         } finally {
-            setLoading(false); // Cambia el estado de carga a false, independiente del resultado.
+            setLoading(false);
         }
     };
 
-
+    // `useEffect` para ejecutar la función `fetchControllerInfo` cuando el componente se monte, obteniendo la información del controlador.
     useEffect(() => {
         fetchControllerInfo();
     }, []);
 
+    // `useEffect` que llama a `fetchControllerInfo` al cargar el componente y luego la ejecuta cada 10 segundos, limpiando el intervalo al desmontar el componente.
     useEffect(() => {
-        fetchControllerInfo(); // Llamada inicial
+        fetchControllerInfo();
 
         const interval = setInterval(() => {
-            fetchControllerInfo(); // Llamada cada 10 segundos
+            fetchControllerInfo();
         }, 10000);
 
-        // Limpieza del intervalo
         return () => clearInterval(interval);
     }, []);
 
+    // Función que actualiza el estado de un sensor específico enviando una solicitud PUT al servidor y luego recargando la información del controlador.
     const handleChangeState = async (sensorType, newValue) => {
         if (dataAutomatica.conection_controller) {
             const urlMap = {
@@ -113,7 +109,7 @@ const MonitorearControladores = () => {
                 return;
             }
 
-            setLoading(true); // Inicia el estado de carga
+            setLoading(true);
 
             try {
                 const response = await fetch(url, {
@@ -121,14 +117,14 @@ const MonitorearControladores = () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         controller_code: item.cod_controller,
-                        [bodyKey]: newValue, // Usa el campo correspondiente al sensor
+                        [bodyKey]: newValue,
                     }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    await fetchControllerInfo(); // Llama al método para actualizar los datos
+                    await fetchControllerInfo();
                     console.log('Datos actualizados');
                 } else {
                     console.error('Error en la respuesta:', data.message);
@@ -138,11 +134,12 @@ const MonitorearControladores = () => {
                 console.error('Error en la solicitud:', error);
                 alert(`Error en la solicitud: ${error.message || error}`);
             } finally {
-                setLoading(false); // Finaliza el estado de carga
+                setLoading(false);
             }
         }
     };
 
+    // Función que devuelve la fuente de imagen correspondiente según el tipo de sensor y su estado (activado o desactivado).
     const getImageSource = (key, value) => {
         if (key.toLowerCase().includes("manual humedifier")) {
             return value ? humidificador : humidificador;
@@ -158,8 +155,8 @@ const MonitorearControladores = () => {
         }
     };
 
+    // Control manual: Función que ajusta el estilo de la imagen según el estado de la conexión y el tipo de sensor, aplicando un color y un tamaño diferente.
     const getImageStyle = (key, value) => {
-
         if (dataAutomatica.conection_controller === false) {
             const isSpecialKey = ['conection_controller'].includes(key);
             return {
@@ -181,6 +178,7 @@ const MonitorearControladores = () => {
 
     };
 
+    // Control Automatico: Función que retorna la imagen correspondiente según el tipo de clave, relacionada con diferentes sensores o estados del controlador.
     const getImageSource2 = (key) => {
         if (key.toLowerCase().includes('humedifier_activated') || key.toLowerCase().includes('humedifier_desactivated')) {
             return humidificador;
@@ -205,6 +203,7 @@ const MonitorearControladores = () => {
         }
     };
 
+    // Control manual: Función que retorna el nombre descriptivo del sensor o estado según la clave proporcionada.
     const getNombre = (key) => {
         if (key.includes('manual_heating')) {
             return 'Calefacción'
@@ -220,8 +219,8 @@ const MonitorearControladores = () => {
         }
     }
 
+    // // Control Automatico: Función que retorna el nombre descriptivo del sensor o estado según la clave proporcionada.
     const getNombre2 = (key) => {
-
         if (key.includes('heating_activated') || key.includes('heating_desactivated')) {
             return 'Calefacción'
         }
@@ -245,7 +244,6 @@ const MonitorearControladores = () => {
         } else { return '' }
     }
 
-
     return (
         <ImageBackground
             backgroundColor='#EDFDF2'
@@ -258,7 +256,7 @@ const MonitorearControladores = () => {
                 // Mostrar indicador de carga o un mensaje si los datos aún no están disponibles
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#19A44E" />
-                    <Text>Cargando...</Text>
+                    <Text>...</Text>
                 </View>
             ) : (
                 // Si los datos están disponibles, renderizar el 
@@ -273,14 +271,12 @@ const MonitorearControladores = () => {
                                 Object.entries(data)
                                     .filter(([, value]) => typeof value !== 'boolean')
                                     .map(([key, value]) => {
-                                        // Agrega los símbolos según la clave
                                         const displayValue = key === 'Temperatura'
                                             ? `${value}°C`
                                             : key === 'Humedad'
                                                 ? `${value}%`
                                                 : value;
 
-                                        // Selecciona el ícono según la clave
                                         const iconName = key === 'Temperatura'
                                             ? 'thermometer'
                                             : key === 'Humedad'
@@ -312,13 +308,13 @@ const MonitorearControladores = () => {
                         <View style={styles.cardsContainer}>
                             {data &&
                                 Object.entries(data)
-                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
+                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null) 
                                     .map(([key, value]) => (
                                         <TouchableOpacity
                                             key={key}
                                             style={[
                                                 styles.card,
-                                                { backgroundColor: value ? 'white' : 'white' }, // Cambia el color de fondo según el valor de `value`
+                                                { backgroundColor: value ? 'white' : 'white' },
                                             ]}
                                             onPress={() => handleChangeState(key, !value)}
                                         >
@@ -331,7 +327,6 @@ const MonitorearControladores = () => {
                                                         />
                                                     </View>
                                                     <Text style={styles.labelEstados}>{getNombre(key)}</Text>
-                                                    {/* <Text style={styles.labelEstados}>{getNombre(key.replace(/_/g, ' '))}</Text> */}
                                                 </View>
 
                                                 <View style={styles.columnRight}>
@@ -339,13 +334,12 @@ const MonitorearControladores = () => {
                                                         value={value}
                                                         onValueChange={() => handleChangeState(key, !value)}
                                                         thumbColor="white"
-                                                        trackColor={{ false: '#ccc', true: 'black' }} // Cambia el color del Switch cuando está activo
+                                                        trackColor={{ false: '#ccc', true: 'black' }} 
                                                         disabled={!dataAutomatica.conection_controller}
-                                                        style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch}  // Aplica estilo adicional cuando está deshabilitado
+                                                        style={dataAutomatica.conection_controller ? {} : styles.disabledSwitch} 
                                                     />
                                                 </View>
                                             </View>
-                                            {/* <Text>{value ? 'Encendido' : 'Apagado'}</Text> */}
                                         </TouchableOpacity>
                                     ))}
                         </View>
@@ -356,7 +350,7 @@ const MonitorearControladores = () => {
                         <View style={styles.cardsContainer2}>
                             {dataAutomatica &&
                                 Object.entries(dataAutomatica)
-                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null) // Filtrar valores booleanos y no null
+                                    .filter(([key, value]) => typeof value === 'boolean' && value !== null)
                                     .map(([key, value]) => (
                                         <Pressable
                                             key={key}
@@ -364,21 +358,21 @@ const MonitorearControladores = () => {
                                                 styles.card2,
                                                 {
                                                     backgroundColor: value ? 'white' : '#f0f0f0',
-                                                    opacity: pressed ? 1 : 1, // Mantén la opacidad fija incluso al presionar
+                                                    opacity: pressed ? 1 : 1, 
                                                 },
                                             ]}
-                                            onPressIn={() => setPressedKey(key)} // Mostrar el nombre al presionar
-                                            onPressOut={() => setPressedKey(null)} // Ocultar el nombre al soltar<
+                                            onPressIn={() => setPressedKey(key)} 
+                                            onPressOut={() => setPressedKey(null)}
                                         >
                                             <View style={styles.imageContainerEstados2}>
                                                 <Image
                                                     source={getImageSource2(key)}
-                                                    style={[styles.statusImage2, getImageStyle(key, value)]} // Agrega el estilo dinámico
+                                                    style={[styles.statusImage2, getImageStyle(key, value)]}
                                                 />
                                             </View>
 
                                             {pressedKey === key && (
-                                                <Text style={styles.pressedText}>{getNombre2(key)}</Text> // Mostrar texto
+                                                <Text style={styles.pressedText}>{getNombre2(key)}</Text>
                                             )}
                                         </Pressable>
                                     ))}
@@ -392,6 +386,7 @@ const MonitorearControladores = () => {
     );
 }
 
+// Define los estilos de la pantalla, contenedores, imágenes y texto en la vista "Monitero de controlador"
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -403,11 +398,11 @@ const styles = StyleSheet.create({
     },
     disabledSwitchOn: {
         color: 'red',
-        opacity: 1, // Reducir opacidad para indicar que está deshabilitado
+        opacity: 1,
     },
     disabledSwitch: {
         color: 'red',
-        opacity: 0.3, // Reducir opacidad para indicar que está deshabilitado
+        opacity: 0.3, 
     },
     title: {
         fontSize: 26,
@@ -424,23 +419,22 @@ const styles = StyleSheet.create({
         color: '#12682F',
     },
     cardsContainer1: {
-        flexDirection: 'row', // Los elementos se distribuyen en filas
-        flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
-        justifyContent: 'space-between', // Espacio uniforme entre elementos
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between',
     },
 
     cardsContainer2: {
-        flexDirection: 'row', // Los elementos se distribuyen en filas
-        flexWrap: 'wrap', // Permite que los elementos pasen a la siguiente fila
-        justifyContent: 'space-between', // Espacio uniforme entre elementos
-        padding: width * 0.05, // Ajustamos el padding según el ancho de la pantalla
-        // borderWidth: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between', 
+        padding: width * 0.05, 
         height: width * 0.7,
     },
     card2: {
-        width: width > 400 ? '30%' : '30%', // Tres elementos por fila en pantallas grandes, dos en pantallas pequeñas
-        aspectRatio: 1, // Mantiene el elemento cuadrado
-        marginBottom: 10, // Espaciado entre filas
+        width: width > 400 ? '30%' : '30%',
+        aspectRatio: 1, 
+        marginBottom: 10,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
@@ -472,11 +466,7 @@ const styles = StyleSheet.create({
     card1: {
         flexDirection: 'row',
         alignItems: 'center',
-        // marginBottom: 10,
-        padding: 10,
-        // borderWidth: 1,
-        // borderColor: '#ccc',
-        // borderRadius: 8,
+        padding: 10,  
     },
     cardsContainer: {
         flexDirection: 'row',
@@ -485,7 +475,6 @@ const styles = StyleSheet.create({
         paddingBottom: 0
     },
     card: {
-        // width: '48%',
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         padding: 10,
@@ -528,15 +517,12 @@ const styles = StyleSheet.create({
     },
     labelEstados: {
         fontSize: 16,
-        // fontWeight: 'bold',
         marginBottom: 10,
         textAlign: 'center'
     },
     label: {
         fontSize: 16,
-        // fontWeight: 'bold',
         marginBottom: 10,
-        // color: '#12682F',
     },
     imageContainer: {
         flexDirection: 'column',
@@ -544,13 +530,13 @@ const styles = StyleSheet.create({
     },
     imageContainerEstados: {
         marginTop: -9,
-        paddingRight: 10, // Espacio entre el círculo y el switch
+        paddingRight: 10,
     },
     columnContainer: {
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between', // Distribuye los hijos entre los extremos
+        justifyContent: 'space-between',
         position: 'relative',
         marginBottom: -40,
     },
@@ -558,35 +544,31 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between', // Distribuye los hijos entre los extremos
+        justifyContent: 'space-between',
         position: 'relative',
         marginBottom: -40,
     },
     columnLeft: {
-        // Alineación del hijo izquierdo
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
     columnRight: {
-        // marginBottom: 1,
-        // Alineación del hijo derecho
+        padding: 2,
+        borderRadius: 10,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
     },
 
-    statusImage: {  // borderColor: 'black',borderWidth: 1,
+    statusImage: { 
         width: 18,
         height: 18,
-        // marginRight: 10,
     },
     num: {
         fontSize: 25,
         fontWeight: 'bold',
         textAlign: 'center',
-        // color: '#fa6900',
-
     },
 });
 

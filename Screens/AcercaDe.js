@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 
-const Nosotros = () => {
+// Muestra la pantalla "Acerca de" con información sobre la aplicación y su funcionalidad
+const AcercaDe = () => {
   return (
     <>
       <View style={styles.topBox}>
@@ -41,6 +42,7 @@ const Nosotros = () => {
   );
 };
 
+// Define los estilos de la pantalla, contenedores, imágenes y texto en la vista "Acerca de"
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -105,4 +107,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Nosotros;
+export default AcercaDe;

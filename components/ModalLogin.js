@@ -1,7 +1,7 @@
-// Modal.js
 import React from 'react';
 import { Modal, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 
+// Componente que muestra un modal de carga con un indicador de actividad y un mensaje personalizado.
 const LoadingModal = ({ isVisible, message }) => {
   return (
     <Modal
@@ -20,12 +20,13 @@ const LoadingModal = ({ isVisible, message }) => {
   );
 };
 
+// Estilos del modal y sus elementos
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: 200,

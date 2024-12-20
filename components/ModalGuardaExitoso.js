@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+// Componente que muestra un modal de exito de guardado con un mensaje y un ícono
 const SaveSuccessModal = ({ visible, onClose }) => {
     return (
         <Modal transparent={true} visible={visible} animationType="fade" onRequestClose={onClose}>
@@ -15,6 +16,7 @@ const SaveSuccessModal = ({ visible, onClose }) => {
     );
 };
 
+// Estilos del modal y sus elementos
 const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
@@ -32,7 +34,6 @@ const styles = StyleSheet.create({
     },
     successMessage: {
         marginTop: 10,
-        // fontSize: 18,
         color: 'green',
     },
 });

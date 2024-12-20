@@ -1,27 +1,25 @@
-
-import { StyleSheet, ImageBackground, Text, View, Button, TouchableOpacity, Image } from 'react-native';
-import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
+import { StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native';
+import 'react-native-gesture-handler';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';;
-
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import IconPlanta from './assets/iconPlanta.png';
+// Rutas de navegación de las vistas
 import InicioInvernadero from './Screens/InicioInvernadero';
 import IniciarSesion from './Screens/IniciarSesion';
 import MonitorearControladores from './Screens/MonitorearControladores';
 import Dashboard from './Screens/Dashboard';
-import Nosotros from './Screens/About';
+import AcercaDe from './Screens/AcercaDe';
 
-import IconPlanta from './assets/iconPlanta.png';
-
-// Crear el Tab Navigator
+// Crea navegadores para las rutas en pestañas y en pila
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Stack Navigator para Monitorear y Dashboard
+// Configura las rutas principales con datos del cliente y vistas específicas
 const MainStack = ({ route }) => {
-  const { dataCliente } = route.params; // Acceder a dataCliente desde route.params
+  const { dataCliente } = route.params; 
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -34,7 +32,7 @@ const MainStack = ({ route }) => {
   );
 };
 
-
+// Configura las pestañas principales con estilos personalizados e íconos
 const MyTabs = ({ handleLogout, dataCliente }) => {
   return (
     <Tab.Navigator
@@ -42,11 +40,11 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
         tabBarStyle: {
           height: 60,
           paddingTop: 10,
-          backgroundColor: '#19A44E', // Fondo de la barra de navegación
+          backgroundColor: '#19A44E',
         },
-        tabBarActiveTintColor: 'white', // Color de los iconos activos
-        tabBarInactiveTintColor: 'black', // Color de los iconos inactivos
-        headerShown: false, // Oculta los encabezados individuales
+        tabBarActiveTintColor: 'white', 
+        tabBarInactiveTintColor: 'black', 
+        headerShown: false,
         tabBarShowLabel: false,
 
       }}
@@ -54,24 +52,24 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
       <Tab.Screen
         name="Invernaderos"
         component={MainStack}
-        initialParams={{ dataCliente }} // Pasamos dataCliente a MainStack
+        initialParams={{ dataCliente }} 
         options={{
           tabBarIcon: ({ focused }) => (
             <Image
-              source={IconPlanta} // Usa la imagen
+              source={IconPlanta}
               style={{
-                width: 24, // Ajusta el tamaño
+                width: 24,
                 height: 24,
-                tintColor: focused ? 'white' : '#000', // Cambia el color según el estado
+                tintColor: focused ? 'white' : '#000',
               }}
-              resizeMode="contain" // Mantiene las proporciones
+              resizeMode="contain"
             />
           ),
         }}
       />
       <Tab.Screen
-        name="Nosotros"
-        component={Nosotros}
+        name="AcercaDe"
+        component={AcercaDe}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="info" color={color} size={size} />
@@ -98,10 +96,11 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
   );
 };
 
+// Muestra una vista inicial con imagen de fondo y transiciona tras 3 segundos
 const VistaInicio = ({ onFinish }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
-      onFinish(); // Llama a la función cuando se debe terminar la vista inicial
+      onFinish();
     }, 3000);
 
     return () => clearTimeout(timeout);
@@ -116,17 +115,20 @@ const VistaInicio = ({ onFinish }) => {
   );
 };
 
-// App principal con navegación
+// Comonente principal de renderizado de las rutas
 export default function App() {
+  // Define los estados para autenticación, vista de introducción y datos del cliente
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [dataCliente, setDataCliente] = useState([]);
 
+  // Maneja el inicio de sesión, actualizando el estado de autenticación y los datos del cliente
   const handleLogin = (data) => {
     setIsAuthenticated(true);
     setDataCliente(data);
   }
 
+  // Maneja el cierre de sesión y la finalización de la vista de introducción
   const handleLogout = () => setIsAuthenticated(false);
   const handleIntroFinish = () => setShowIntro(false);
 
@@ -162,6 +164,7 @@ export default function App() {
   );
 }
 
+//Estilos del componente
 const styles = StyleSheet.create({
   screen: {
     flex: 1,

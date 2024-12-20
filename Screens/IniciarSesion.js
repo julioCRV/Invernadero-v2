@@ -6,7 +6,9 @@ import LoadingModal from '../components/ModalLogin';
 import SuccessModal from '../components/ModalExito';
 import ErrorModal from '../components/ModalError';
 
+// Componente para manejar el proceso y diseño del inicio de sesión.
 const IniciarSesion = ({ onLogin }) => {
+    // Define los estados para manejar las credenciales de usuario, el estado de carga, el éxito o error de login, y los mensajes de error.
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [visible, setVisible] = useState(false);
@@ -15,45 +17,43 @@ const IniciarSesion = ({ onLogin }) => {
     const [isLoginError, setIsLoginError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    // Realiza el intento de login, manejando el estado de carga, errores y éxito con un tiempo de espera y abortando la solicitud si excede 10 segundos.
     const logueo = async () => {
         try {
             setIsLoading(true);
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout de 5 segundos
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
                 body: JSON.stringify({ user_name: username, password: password }),
                 signal: controller.signal,
             });
 
-            clearTimeout(timeoutId); // Limpiar timeout si la solicitud se completa antes
+            clearTimeout(timeoutId);
 
             if (!res.ok) {
-                setIsLoading(false); // Detener el modal de carga
+                setIsLoading(false);
                 setErrorMessage('Error: Usuario o contraseña incorrectos');
                 setIsLoginError(true);
 
                 // Cerrar el modal de error después de 3 segundos
                 setTimeout(() => {
                     setIsLoginError(false);
-                }, 3000); // Cerrar el modal de éxito y llamar a la función onLogin después de 2 segundo
+                }, 3000);
 
                 throw new Error('Login failed');
             }
             const data = await res.json();
-            // alert(`ingresandoo exitosoooooooo: ${data.user_code}`);
-            // console.log('Login successful', data);
-            setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
-            setIsLoginSuccess(true); // Mostrar el modal de éxito
+            setIsLoading(false);
+            setIsLoginSuccess(true);
 
             // Cerrar el modal de éxito y llamar a la función onLogin después de 2 segundo
             setTimeout(() => {
-                setIsLoginSuccess(false);  // Cerrar el modal de éxito
-                onLogin(data); // Llamar a la función onLogin (si la tienes)
+                setIsLoginSuccess(false);
+                onLogin(data);
             }, 2000);
         } catch (err) {
             setIsLoading(false);
@@ -63,61 +63,6 @@ const IniciarSesion = ({ onLogin }) => {
                 setErrorMessage(` ${err}`);
             }
             console.error(err);
-            // alert(`Error en la solicitud: ${err}`);
-        }
-    };
-
-    const logueo2 = async () => {
-        try {
-            setIsLoading(true); // Inicia el modal de carga
-
-            const res = await fetch('https://gmb-tci.onrender.com/user/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: "romulotoco", password: "fantasma" }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                console.log('Login successful', data);
-                // alert(`Login existosooooooooooo ${data.user_code}`); 
-                // Aquí, en vez de usar setTimeout, gestionamos el cierre del modal sin demoras innecesarias
-                setIsLoading(false); // Detener el modal de carga inmediatamente después de la respuesta
-                setIsLoginSuccess(true); // Mostrar el modal de éxito
-
-                // Cerrar el modal de éxito y llamar a la función onLogin después de 1 segundo
-                setTimeout(() => {
-                    setIsLoginSuccess(false);  // Cerrar el modal de éxito
-                    onLogin(data); // Llamar a la función onLogin (si la tienes)
-                }, 3000);
-
-            } else {
-                // Manejo de error
-                setIsLoading(false); // Detener el modal de carga
-                setErrorMessage('Error: Usuario o contraseña incorrectos');
-                setIsLoginError(true);
-
-                // Cerrar el modal de error después de 3 segundos
-                setTimeout(() => {
-                    setIsLoginError(false);
-                }, 3000);
-                console.error('Login failed', data.message);
-                alert('Login failed');
-            }
-        } catch (err) {
-            // Manejo de error de conexión
-            setIsLoading(false); // Detener el modal de carga
-            setLoginMessage('Error de conexión');
-            setErrorMessage('Error de conexión');
-            setIsLoginError(true);
-
-            // Cerrar el modal después de 3 segundos
-            setTimeout(() => {
-                setIsLoginError(false);
-            }, 1000);
-            console.error('Error:', err);
-            alert('Error de conexión');
         }
     };
 
@@ -125,7 +70,6 @@ const IniciarSesion = ({ onLogin }) => {
         <View style={styles.container}>
             <StatusBar backgroundColor={color.primary} />
             <View style={styles.box}>
-                {/*Circle*/}
                 <Image
                     source={require('../assets/imagenLogin2.png')}
                     style={styles.containerImage}
@@ -153,7 +97,6 @@ const IniciarSesion = ({ onLogin }) => {
                         onChangeText={setPassword}
                         secureTextEntry={visible}
                     />
-
                     <Pressable style={styles.iconEye} onPress={() => setVisible(!visible)}>
                         {
                             visible ? (<Feather name="eye-off" size={24} color="black" />) : (<Feather name="eye" size={24} color="black" />)
@@ -161,13 +104,12 @@ const IniciarSesion = ({ onLogin }) => {
                     </Pressable>
                 </View>
 
-
                 <Pressable title="Login" onPress={logueo} style={styles.button}>
                     <Text style={styles.buttonText}>Iniciar Sesión</Text>
                 </Pressable>
             </View>
 
-            {/* Modal de carga */}
+            {/* Modales de estado */}
             <LoadingModal isVisible={isLoading} message="Iniciando sesión..." />
             <SuccessModal visible={isLoginSuccess} onClose={() => setIsLoginSuccess(false)} />
             <ErrorModal visible={isLoginError} errorMessage={errorMessage} onClose={() => setIsLoginError(false)} />
@@ -175,6 +117,7 @@ const IniciarSesion = ({ onLogin }) => {
     )
 }
 
+// Define los estilos de la pantalla, contenedores, imágenes y texto en la vista "Iniciar sesións"
 const color = {
     primary: '#A1B4AA',
     font: '#25A256',

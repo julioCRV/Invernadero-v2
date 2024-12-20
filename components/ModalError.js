@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+// Componente que muestra un modal de error con un mensaje y un ícono
 const ErrorModal = ({ visible, errorMessage, onClose }) => {
   return (
     <Modal transparent={true} visible={visible} animationType="fade" onRequestClose={onClose}>
@@ -15,6 +16,7 @@ const ErrorModal = ({ visible, errorMessage, onClose }) => {
   );
 };
 
+// Estilos del modal y sus elementos
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
@@ -33,7 +35,6 @@ const styles = StyleSheet.create({
   errorMessage: {
     marginTop: 10,
     textAlign: 'center',
-    // fontSize: 18,
     color: 'red',
   },
 });

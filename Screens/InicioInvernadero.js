@@ -6,49 +6,27 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import IconPlanta from '../assets/iconPlanta.png';
-import SaveSuccessModal  from "../components/ModalGuardaExitoso";
+import SaveSuccessModal from "../components/ModalGuardaExitoso";
 
-const cropImages = {
-    1: require('../assets/zanahoria.png'),
-    2: require('../assets/lechuga.png'),
-    3: require('../assets/tomate.png'),
-    4: require('../assets/frutilla.png'),
-};
 const screenWidth = Dimensions.get('window').width;
 
+// Componente para manejar el proceso y la vista de la lista de invernaderos.
 const BoxItem = ({ item, onReload }) => {
+    // Define estados para manejar la navegación, la visibilidad de un modal, la edición, los cultivos, y los datos relacionados con un cultivo específico, como su título y descripción.
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
-    const [editedData, setEditedData] = useState({
-        tipe: item.details.controller_title,
-        description: item.details.controller_description,
-        feature: item.details.crop_name,
-        cod: item.details.controller_title,
-    });
-
     const [crops, setCrops] = useState([]);
-
     const [selectedCrop, setSelectedCrop] = useState(null);
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [tipo, setTipo] = useState('');
+    const [isSaveModalVisible, setSaveModalVisible] = React.useState(false);
 
-
-    useEffect(() => {
-        setEditedData({
-            tipe: item.details?.controller_title || "",
-            description: item.details?.controller_description || "",
-            feature: item.details?.crop_name || "",
-            cod: item.details?.controller_title || "",
-        });
-    }, [item.details]);
-
+    // Función asíncrona para obtener la lista de cultivos desde un API y asignar el cultivo seleccionado por defecto basado en el código del cultivo del ítem.
     const fetchCrops = async () => {
         try {
             const response = await fetch('https://gmb-tci.onrender.com/crop/get_crops', {
-                method: 'GET', // Cambiar a 'POST' si la API lo requiere
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -58,62 +36,51 @@ const BoxItem = ({ item, onReload }) => {
                 throw new Error(`Error en la solicitud: ${response.statusText}`);
             }
 
-            const data = await response.json(); // Suponiendo que la API devuelve JSON
+            const data = await response.json();
             const defaultCrop = data.find(crop => crop.crop_code === item.cod_crop);
             if (defaultCrop) {
                 setSelectedCrop(defaultCrop);
             }
-            setCrops(data); // Guarda los datos obtenidos en el estado `crops`
+            setCrops(data);
         } catch (error) {
             console.error('Error al obtener los cultivos:', error);
         }
     };
 
+    // Hook `useEffect` para ejecutar la función `fetchCrops` al montar el componente, obteniendo los cultivos disponibles.
     useEffect(() => {
         fetchCrops();
     }, []);
 
+    // Función que muestra el modal para ver los detalles del controlador y establece que no se está editando.
     const goDetalles = () => {
-        //Click en Detalles
         setModalVisible(true);
         setIsEditing(false);
-        setIsVisible(true);
     }
+
+    // Navega a la pantalla "Monitorear" pasando el objeto item como parámetro.
     const goMonitorear = () => {
         navigation.navigate('Monitorear', { item });
     }
 
+    // Navega a la pantalla "Dashboard" pasando el objeto item como parámetro.
     const goDashboard = () => {
-        //Click en Dashboard
         navigation.navigate('Dashboard', { item });
     }
+
+    // Abre el modal para editar un controlador, establece el título y descripción, y selecciona el cultivo correspondiente basado en el item y crops.
     const goEditar = () => {
         setTitulo(item.details.controller_title);
         setDescripcion(item.details.controller_description);
-        setTipo(editedData.feature || '');
-
+        const defaultCrop = crops.find(crop => crop.crop_code === item.cod_crop);
+        if (defaultCrop) {
+            setSelectedCrop(defaultCrop);
+        }
         setModalVisible(true);
         setIsEditing(true);
-        setIsVisible(false);
     }
 
-    // Función para actualizar el estado 'editedData' cuando se recargan los datos
-    const updateData = (newItem) => {
-        setEditedData({
-            tipe: newItem.tipe,
-            description: newItem.description,
-            feature: newItem.feature,
-            cod: newItem.cod,
-        });
-    };
-
-    // Usamos el efecto para actualizar 'editedData' cuando 'item' cambia
-    useEffect(() => {
-        updateData(item);
-    }, [item]); // Esto actualizará 'editedData' cada vez que 'item' cambie
-
-    const [isSaveModalVisible, setSaveModalVisible] = React.useState(false);
-
+    // Función que actualiza los detalles del controlador y muestra un modal de éxito al guardar los cambios.
     const handleSave = async () => {
         const controllerData = {
             controller_code: item.cod_controller,
@@ -150,19 +117,18 @@ const BoxItem = ({ item, onReload }) => {
         setModalVisible(false);
     };
 
-    // Handlers para cambiar los valores
+    // Funciones para manejar los cambios en los campos de título y descripción.
     const handleTituloChange = (value) => setTitulo(value);
     const handleDescripcionChange = (value) => setDescripcion(value);
-    const handleTipoChange = (value) => setTipo(value);
 
-
+    // Función para manejar la selección de un cultivo.
     const handleSelect = (crop) => {
         setSelectedCrop(crop);
     };
 
     return (
         <View style={styles.box}>
-                <SaveSuccessModal visible={isSaveModalVisible} onClose={() => setSaveModalVisible(false)} />
+            <SaveSuccessModal visible={isSaveModalVisible} onClose={() => setSaveModalVisible(false)} />
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -179,8 +145,6 @@ const BoxItem = ({ item, onReload }) => {
                             <Icon name="close" size={20} color="black" />
                         </Pressable>
 
-
-
                         {/* Vista de modo de edición*/}
                         {isEditing ? (
                             <>
@@ -196,8 +160,8 @@ const BoxItem = ({ item, onReload }) => {
                                     <TextInput
                                         value={descripcion}
                                         onChangeText={handleDescripcionChange}
-                                        multiline={true} // Permite múltiples líneas
-                                        numberOfLines={10} // Número de líneas visibles por defecto
+                                        multiline={true}
+                                        numberOfLines={10}
                                         style={{ borderColor: 'black', borderWidth: 1, marginBottom: 20, height: Math.max(35, descripcion.length / 10 * 8), padding: 7 }}
                                     />
                                     <Text style={{ alignSelf: 'flex-start', fontWeight: '700', color: '#12682F' }}>Tipo de Cultivo:</Text>
@@ -255,16 +219,14 @@ const BoxItem = ({ item, onReload }) => {
                     </View>
                 </View>
             </Modal>
-            {/**el item.image debe entrar en un elemento imagen con uri */}
-
             <Image
-                source={item.image} // Ruta relativa a la imagen local
-                style={{ width: screenWidth * 0.8, height: screenWidth * 0.3, borderRadius: 15 }} // Ajusta el tamaño de la imagen
+                source={item.image}
+                style={{ width: screenWidth * 0.8, height: screenWidth * 0.3, borderRadius: 15 }}
             />
             <Text style={styles.title2}>{item.details.controller_title}</Text>
 
             <StatusBar backgroundColor={color.font} />
-            {/* <Text style={styles.text}>{item.description}</Text> */}
+
             {/**Buttons */}
             <View style={styles.boxButtons}>
                 <Pressable style={[styles.button, { backgroundColor: color.font }]} onPress={() => goMonitorear()}>
@@ -289,12 +251,19 @@ const BoxItem = ({ item, onReload }) => {
 
 };
 
-
+// Componente para manejar el proceso y diseño de la lista de invernaderos de un cliente.
 const InicioInvernadero = ({ dataCliente }) => {
+    // Estado para almacenar datos y control de recarga, junto con un objeto que mapea números a imágenes de cultivos.
     const [data, setData] = useState(null);
-    const [reload, setReload] = useState(false); // Estado de recarga
-    const [loading, setLoading] = useState(true);  // Estado de carga
+    const [reload, setReload] = useState(false);
+    const cropImages = {
+        1: require('../assets/zanahoria.png'),
+        2: require('../assets/lechuga.png'),
+        3: require('../assets/tomate.png'),
+        4: require('../assets/frutilla.png'),
+    };
 
+    // Realiza una solicitud POST para obtener invernaderos, asigna imágenes a los cultivos y pasa los datos actualizados a otra función.
     const fetchGetInvernaderos = async () => {
         try {
             const response = await fetch('https://gmb-tci.onrender.com/controller/get_drivers', {
@@ -312,8 +281,8 @@ const InicioInvernadero = ({ dataCliente }) => {
                     const image = cropImages[item.cod_crop];
                     return {
                         ...item,
-                        id: index + 1, // Asignar un ID único basado en el índice (comienza en 1)
-                        image: image || null // Si no hay imagen asociada, se agrega null
+                        id: index + 1,
+                        image: image || null
                     };
                 });
 
@@ -326,11 +295,10 @@ const InicioInvernadero = ({ dataCliente }) => {
         }
     };
 
+    // Realiza solicitudes para obtener detalles de cada controlador y actualiza los datos de los invernaderos, filtrando solo aquellos con detalles válidos.
     const fetchGetDetails = async (data) => {
-        // Iterar sobre cada controlador en data
         for (let controller of data) {
             try {
-                // Realizar la solicitud POST con fetch
                 const response = await fetch('https://gmb-tci.onrender.com/controller/get_controller_detail', {
                     method: 'POST',
                     headers: {
@@ -339,15 +307,11 @@ const InicioInvernadero = ({ dataCliente }) => {
                     body: JSON.stringify({ controller_code: controller.cod_controller })
                 });
 
-                // Verificar si la respuesta es exitosa
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.statusText}`);
                 }
 
-                // Convertir la respuesta en JSON
                 const controllerDetails = await response.json();
-
-                // Añadir los detalles obtenidos al objeto del controlador
                 controller.details = controllerDetails;
             } catch (error) {
                 console.error(`Error al obtener los detalles para el controlador ${controller.controller_code}:`, error);
@@ -362,44 +326,14 @@ const InicioInvernadero = ({ dataCliente }) => {
         setData(cleanControllers(data));
     };
 
-    // useEffect(() => {
-    //     fetchGetInvernaderos();
-    // }, []);
-
-    // useEffect(() => {
-    //     // Llama a fetchGetInvernaderos una vez
-    //     fetchGetInvernaderos();
-
-    //     // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
-    //     const interval = setInterval(() => {
-    //         if (data === null) { // Solo realiza la llamada si data es null
-    //             fetchGetInvernaderos();
-    //         }
-    //     }, 5000);
-
-    //     // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
-    //     return () => clearInterval(interval);
-
-    // }, [data]);
-
+    // Ejecuta la función fetchGetInvernaderos cada vez que el estado reload cambie.
     useEffect(() => {
-        // Llama a fetchGetInvernaderos una vez
         fetchGetInvernaderos();
+    }, [reload]);
 
-        // Configura el intervalo para llamar fetchGetInvernaderos repetidamente cada 5 segundos
-        const interval = setInterval(() => {
-            if (data === null) { // Solo realiza la llamada si data es null
-                fetchGetInvernaderos();
-            }
-        }, 5000);
-
-        // Limpieza del intervalo cuando el componente se desmonte o data deje de ser null
-        return () => clearInterval(interval);
-
-    }, [data]); // Dependencia en 'data' para que se ejecute cada vez que cambie
-
+    // Cambia el estado `reload` alternando su valor actual (true/false) cuando se llama a `handleReload`.
     const handleReload = () => {
-        setReload(prerv => !prerv); // Cambiar el valor de reload para recargar los datos
+        setReload(prerv => !prerv);
     };
 
     return (
@@ -428,12 +362,12 @@ const InicioInvernadero = ({ dataCliente }) => {
     )
 }
 
-
+// Define los estilos de la pantalla, contenedores, imágenes y texto en la vista "Dashboard"
 const color = {
     primary: '#A1B4AA',
     font: '#25A256',
-
 }
+
 const styles = StyleSheet.create({
     itemA: {
         padding: 5,
@@ -444,17 +378,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     selectedItemA: {
-        backgroundColor: '#D3F9D8', // Color de fondo para el ítem seleccionado
+        backgroundColor: '#D3F9D8',
     },
     itemTextA: {
         fontSize: 14,
         color: 'black',
     },
     selectedTextA: {
-        color: 'green', // Color de texto para el ítem seleccionado
+        color: 'green',
         fontWeight: 'bold',
     },
-
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -554,23 +487,21 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 10,
         top: 5,
-        borderRadius: 25, // Hace el botón circular
+        borderRadius: 25,
         borderColor: 'black',
         backgroundColor: '#FF1014',
         borderWidth: 1,
-        width: 30, // Aumenta para mayor área de toque
-        height: 30, // Aumenta para mayor área de toque
-        justifyContent: 'center', // Centra el ícono horizontalmente
-        alignItems: 'center', // Centra el ícono verticalmente
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
 const { height } = Dimensions.get('window')
-
 const TITLE_HEIGHT = 70;
 const FLATLIST_HEIGHT = height - 50 - TITLE_HEIGHT;
-
-const BOX_HEIGHT = 200; // Altura predefinida
+const BOX_HEIGHT = 200;
 
 const style = StyleSheet.create({
     container: {
