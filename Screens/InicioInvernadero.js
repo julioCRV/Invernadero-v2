@@ -331,6 +331,18 @@ const InicioInvernadero = ({ dataCliente }) => {
         fetchGetInvernaderos();
     }, [reload]);
 
+    // `useEffect` que llama a `fetchControllerInfo` al cargar el componente y luego la ejecuta cada 10 segundos, limpiando el intervalo al desmontar el componente.
+    useEffect(() => {
+        fetchGetInvernaderos();
+
+        const interval = setInterval(() => {
+            fetchGetInvernaderos();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+
     // Cambia el estado `reload` alternando su valor actual (true/false) cuando se llama a `handleReload`.
     const handleReload = () => {
         setReload(prerv => !prerv);

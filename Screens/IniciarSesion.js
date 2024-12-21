@@ -1,7 +1,7 @@
 import { View, Text, TextInput, StyleSheet, Pressable, StatusBar, Image } from 'react-native';
 import Octicons from '@expo/vector-icons/Octicons';
 import Feather from '@expo/vector-icons/Feather';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import LoadingModal from '../components/ModalLogin';
 import SuccessModal from '../components/ModalExito';
 import ErrorModal from '../components/ModalError';
@@ -28,7 +28,8 @@ const IniciarSesion = ({ onLogin }) => {
             const res = await fetch('https://gmb-tci.onrender.com/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: username, password: password }),
+                // body: JSON.stringify({ user_name: username, password: password }),
+                body: JSON.stringify({ user_name: 'romulotoco', password: 'fantasma' }),
                 signal: controller.signal,
             });
 
