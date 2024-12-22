@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import IconPlanta from '../assets/iconPlanta.png';
 import SaveSuccessModal from "../components/ModalGuardaExitoso";
+import SaveChangesModal from '../components/MogalGuardarCambios';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -79,7 +80,12 @@ const BoxItem = ({ item, onReload }) => {
         setModalVisible(true);
         setIsEditing(true);
     }
-
+    const [modalVisibleGuardar, setModalVisibleGuardar] = useState(false);
+  
+    const handleCancelChanges = () => {
+      setModalVisibleGuardar(false);
+    };
+  
     // Función que actualiza los detalles del controlador y muestra un modal de éxito al guardar los cambios.
     const handleSave = async () => {
         const controllerData = {
@@ -115,6 +121,7 @@ const BoxItem = ({ item, onReload }) => {
             console.error('Error en la solicitud:', error);
         }
         setModalVisible(false);
+        setModalVisibleGuardar(false);
     };
 
     // Funciones para manejar los cambios en los campos de título y descripción.
@@ -191,7 +198,7 @@ const BoxItem = ({ item, onReload }) => {
                                         <Pressable style={style.button2} onPress={() => setModalVisible(false)} >
                                             <Text style={style.textButton}>Cancelar</Text>
                                         </Pressable>
-                                        <Pressable style={style.button} onPress={handleSave}>
+                                        <Pressable style={style.button} onPress={() => setModalVisibleGuardar(true)}>
                                             <Text style={style.textButton}>Guardar</Text>
                                         </Pressable>
                                     </View>
@@ -246,6 +253,11 @@ const BoxItem = ({ item, onReload }) => {
                     <Text>Dashboard</Text>
                 </Pressable>
             </View>
+            <SaveChangesModal
+                visible={modalVisibleGuardar}
+                onSave={handleSave}
+                onCancel={handleCancelChanges}
+            />
         </View>
     )
 

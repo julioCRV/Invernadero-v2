@@ -78,7 +78,7 @@ const MonitorearControladores = () => {
 
         const interval = setInterval(() => {
             fetchControllerInfo();
-        }, 10000);
+        }, 7000);
 
         return () => clearInterval(interval);
     }, []);

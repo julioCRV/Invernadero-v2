@@ -18,6 +18,7 @@ import Feather from '@expo/vector-icons/Feather';
 import LoadingModal from './components/ModalLogin';
 import SuccessModal from './components/ModalExito';
 import ErrorModal from './components/ModalError';
+import LogoutConfirmationModal from './components/ModalCerrarSesion';
 
 // Crea navegadores para las rutas en pestañas y en pila
 const Tab = createBottomTabNavigator();
@@ -97,7 +98,6 @@ const MyTabs = ({ handleLogout, dataCliente }) => {
       >
         {() => null}
       </Tab.Screen>
-
     </Tab.Navigator>
   );
 };
@@ -136,10 +136,20 @@ export default function App() {
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Maneja el cierre de sesión y la finalización de la vista de introducción
-  const handleLogout = () => setIsAuthenticated(false);
+  const handleLogout = () => setModalVisible(true);
   const handleIntroFinish = () => setShowIntro(false);
+
+  const cancelLogout = () => {
+    setModalVisible(false);
+  };
+
+  const confirmLogout = () => {
+    setIsAuthenticated(false);
+    setModalVisible(false);
+  };
 
   useEffect(() => {
     // Forzamos una actualización de la pantalla de navegación al cambiar el estado
@@ -198,78 +208,84 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Pantalla inicial */}
-        {showIntro && (
-          <Stack.Screen name="VistaInicio">
-            {(props) => <VistaInicio {...props} onFinish={handleIntroFinish} />}
-          </Stack.Screen>
-        )}
-        {/* Autenticación */}
-        {!isAuthenticated && !showIntro && (
-          <Stack.Screen name="IniciarSesion">
+    <>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {/* Pantalla inicial */}
+          {showIntro && (
+            <Stack.Screen name="VistaInicio">
+              {(props) => <VistaInicio {...props} onFinish={handleIntroFinish} />}
+            </Stack.Screen>
+          )}
+          {/* Autenticación */}
+          {!isAuthenticated && !showIntro && (
+            <Stack.Screen name="IniciarSesion">
 
-            {(props) => (
-              <View style={styles.container}>
-                <StatusBar backgroundColor={color.primary} />
-                <View style={styles.box}>
-                  <Image
-                    source={require('./assets/imagenLogin2.png')}
-                    style={styles.containerImage}
-                  />
-                  <Text style={styles.title}>Bienvenido a Green Manager TC</Text>
-
-                  <View style={styles.inputContainer}>
-                    <Octicons name="person" size={24} color="black" />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Nombre de usuario"
-                      placeholderTextColor={color.font}
-                      value={username}
-                      onChangeText={setUsername}
+              {(props) => (
+                <View style={styles.container}>
+                  <StatusBar backgroundColor={color.primary} />
+                  <View style={styles.box}>
+                    <Image
+                      source={require('./assets/imagenLogin2.png')}
+                      style={styles.containerImage}
                     />
-                  </View>
+                    <Text style={styles.title}>Bienvenido a Green Manager TC</Text>
 
-                  <View style={styles.inputContainer}>
-                    <Feather name="unlock" size={24} color="black" />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Contraseña"
-                      placeholderTextColor={color.font}
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={visible}
-                    />
-                    <Pressable style={styles.iconEye} onPress={() => setVisible(!visible)}>
-                      {
-                        visible ? (<Feather name="eye-off" size={24} color="black" />) : (<Feather name="eye" size={24} color="black" />)
-                      }
+                    <View style={styles.inputContainer}>
+                      <Octicons name="person" size={24} color="black" />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Nombre de usuario"
+                        placeholderTextColor={color.font}
+                        value={username}
+                        onChangeText={setUsername}
+                      />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                      <Feather name="unlock" size={24} color="black" />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Contraseña"
+                        placeholderTextColor={color.font}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={visible}
+                      />
+                      <Pressable style={styles.iconEye} onPress={() => setVisible(!visible)}>
+                        {
+                          visible ? (<Feather name="eye-off" size={24} color="black" />) : (<Feather name="eye" size={24} color="black" />)
+                        }
+                      </Pressable>
+                    </View>
+
+                    <Pressable title="Login" onPress={logueo} style={styles.button}>
+                      <Text style={styles.buttonText}>Iniciar Sesión</Text>
                     </Pressable>
                   </View>
 
-                  <Pressable title="Login" onPress={logueo} style={styles.button}>
-                    <Text style={styles.buttonText}>Iniciar Sesión</Text>
-                  </Pressable>
+                  {/* Modales de estado */}
+                  <LoadingModal isVisible={isLoading} message="Iniciando sesión..." />
+                  <SuccessModal visible={isLoginSuccess} onClose={() => setIsLoginSuccess(false)} />
+                  <ErrorModal visible={isLoginError} errorMessage={errorMessage} onClose={() => setIsLoginError(false)} />
                 </View>
-
-                {/* Modales de estado */}
-                <LoadingModal isVisible={isLoading} message="Iniciando sesión..." />
-                <SuccessModal visible={isLoginSuccess} onClose={() => setIsLoginSuccess(false)} />
-                <ErrorModal visible={isLoginError} errorMessage={errorMessage} onClose={() => setIsLoginError(false)} />
-              </View>
-            )}
-          </Stack.Screen>
-        )}
-        {/* Navegación principal */}
-        {isAuthenticated && (
-          <Stack.Screen name="Main">
-            {(props) => <MyTabs {...props} handleLogout={handleLogout} dataCliente={dataCliente} />}
-          </Stack.Screen>
-        )}
-      </Stack.Navigator>
-
-    </NavigationContainer>
+              )}
+            </Stack.Screen>
+          )}
+          {/* Navegación principal */}
+          {isAuthenticated && (
+            <Stack.Screen name="Main">
+              {(props) => <MyTabs {...props} handleLogout={handleLogout} dataCliente={dataCliente} />}
+            </Stack.Screen>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <LogoutConfirmationModal
+        visible={modalVisible}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
+    </>
   );
 }
 
