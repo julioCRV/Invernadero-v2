@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "- Green Manager TC -",
+    "name": "Green Manager T.C.",
     "slug": "Green",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.tcinnova.Green"
+      "package": "com.GreenTC.Green"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,8 +33,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "enabled": false,
-      "url": "https://u.expo.dev/9d72dc6f-5f40-48c4-a84e-f8f7a8d7c61a"
+      "enabled": false
     }
   }
 }
