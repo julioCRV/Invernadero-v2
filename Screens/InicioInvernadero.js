@@ -81,11 +81,11 @@ const BoxItem = ({ item, onReload }) => {
         setIsEditing(true);
     }
     const [modalVisibleGuardar, setModalVisibleGuardar] = useState(false);
-  
+
     const handleCancelChanges = () => {
-      setModalVisibleGuardar(false);
+        setModalVisibleGuardar(false);
     };
-  
+
     // Función que actualiza los detalles del controlador y muestra un modal de éxito al guardar los cambios.
     const handleSave = async () => {
         const controllerData = {
@@ -274,6 +274,8 @@ const InicioInvernadero = ({ dataCliente }) => {
         3: require('../assets/tomate.png'),
         4: require('../assets/frutilla.png'),
     };
+    const [loading, setLoading] = useState(true);
+    const [showNoDataMessage, setShowNoDataMessage] = useState(false);
 
     // Realiza una solicitud POST para obtener invernaderos, asigna imágenes a los cultivos y pasa los datos actualizados a otra función.
     const fetchGetInvernaderos = async () => {
@@ -304,6 +306,13 @@ const InicioInvernadero = ({ dataCliente }) => {
             }
         } catch (error) {
             console.error('Error en la solicitud:', error);
+        } finally {
+            setTimeout(() => {
+                if (!data || data.length === 0) {
+                    setShowNoDataMessage(true);
+                }
+                setLoading(false);
+            }, 3000); // Tiempo de espera simulado antes de decidir si hay datos
         }
     };
 
@@ -349,7 +358,7 @@ const InicioInvernadero = ({ dataCliente }) => {
 
         const interval = setInterval(() => {
             fetchGetInvernaderos();
-        }, 5000);
+        }, 7000);
 
         return () => clearInterval(interval);
     }, []);
@@ -359,6 +368,10 @@ const InicioInvernadero = ({ dataCliente }) => {
     const handleReload = () => {
         setReload(prerv => !prerv);
     };
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#19A44E" />;
+    }
 
     return (
         <>
@@ -378,8 +391,12 @@ const InicioInvernadero = ({ dataCliente }) => {
                     </View>
                 </View>
             ) : (
-                // Si data es null, muestra un indicador de carga
-                <ActivityIndicator size="large" color="#19A44E" />
+                // Si no hay datos, muestra un mensaje de "No disponibles"
+                showNoDataMessage && (
+                    <View style={styles.noDataContainer}>
+                        <Text style={styles.noDataText}>No se encontraron invernaderos disponibles.</Text>
+                    </View>
+                )
             )}
         </>
 
@@ -393,6 +410,15 @@ const color = {
 }
 
 const styles = StyleSheet.create({
+    noDataContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noDataText: {
+        fontSize: 16,
+        color: '#666666',
+    },
     itemA: {
         padding: 5,
         marginBottom: 10,
