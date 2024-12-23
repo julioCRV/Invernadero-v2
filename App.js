@@ -131,7 +131,7 @@ export default function App() {
   // Define los estados para manejar las credenciales de usuario, el estado de carga, el éxito o error de login, y los mensajes de error.
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
@@ -147,6 +147,7 @@ export default function App() {
   };
 
   const confirmLogout = () => {
+    setUsername(''); setPassword(''); setVisible(true);
     setIsAuthenticated(false);
     setModalVisible(false);
   };
@@ -181,7 +182,7 @@ export default function App() {
         // Cerrar el modal de error después de 3 segundos
         setTimeout(() => {
           setIsLoginError(false);
-        }, 3000);
+        }, 2000);
 
         throw new Error('Login failed');
       }
@@ -194,7 +195,7 @@ export default function App() {
       setTimeout(() => {
         setIsAuthenticated(true);
         setIsLoginSuccess(false);
-      }, 2000);
+      }, 1000);
 
     } catch (err) {
       setIsLoading(false);
