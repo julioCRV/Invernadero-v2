@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.GreenTC.Green"
+      "package": "com.juliocrv.Green"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,7 +33,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/9d72dc6f-5f40-48c4-a84e-f8f7a8d7c61a"
+      "enabled": false
     }
   }
 }
